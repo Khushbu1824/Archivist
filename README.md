@@ -93,8 +93,6 @@ The database consists of the following tables:
 
 ## Screenshots 📷
 
-*(Include screenshots of the key pages here.)*
-
 ### Home Page
 
 ![Home Page 1](images/home1.png)  
