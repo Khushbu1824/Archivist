@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+
+<html>
+
+
+
+<head>
+
+    <title>Membership Renewal</title>
+
+    <style>
+        body {
+
+            font-family: 'Arial', sans-serif;
+            /* Modern font */
+
+            background-color: #f0f0f0;
+            /* Softer background */
+
+            margin: 0;
+
+            padding: 0;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            min-height: 100vh;
+
+        }
+
+
+
+        .container {
+
+            background-color: #fff;
+
+            padding: 30px;
+            /* More padding */
+
+            border-radius: 10px;
+            /* More rounded corners */
+
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+            /* Stronger shadow */
+
+            width: 450px;
+            /* Slightly wider */
+
+        }
+
+
+
+        h1 {
+
+            text-align: center;
+
+            margin-bottom: 25px;
+            /* More margin */
+
+            color: #3498db;
+            /* Blue heading */
+
+        }
+
+
+
+        label {
+
+            display: block;
+
+            margin-bottom: 8px;
+            /* More margin */
+
+            color: #777;
+            /* Lighter label color */
+
+        }
+
+
+
+        input[type="text"],
+
+        input[type="email"],
+
+        input[type="date"] {
+
+            width: calc(100% - 16px);
+            /* Adjusted for padding and border */
+
+            padding: 10px;
+            /* More padding */
+
+            margin-bottom: 15px;
+            /* More margin */
+
+            border: 1px solid #bdc3c7;
+            /* Light gray border */
+
+            border-radius: 5px;
+            /* More rounded corners */
+
+            box-sizing: border-box;
+
+            transition: border-color 0.3s ease;
+            /* Smooth border transition */
+
+        }
+
+
+
+        input[type="text"]:focus,
+
+        input[type="email"]:focus,
+
+        input[type="date"]:focus {
+
+            border-color: #3498db;
+            /* Blue border on focus */
+
+            outline: none;
+            /* Remove default outline */
+
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.2);
+            /* Subtle blue shadow on focus */
+
+        }
+
+
+
+        input[type="submit"] {
+
+            background-color: #3498db;
+            /* Blue button */
+
+            color: white;
+
+            padding: 12px 20px;
+            /* More padding */
+
+            border: none;
+
+            border-radius: 5px;
+
+            cursor: pointer;
+
+            width: 100%;
+
+            font-weight: 600;
+            /* Bold text */
+
+            transition: background-color 0.3s ease;
+            /* Smooth transition */
+
+        }
+
+
+
+        input[type="submit"]:hover {
+
+            background-color: #2980b9;
+            /* Darker blue on hover */
+
+        }
+
+
+
+        .messages {
+
+            margin-top: 15px;
+            /* More margin */
+
+            padding: 15px;
+            /* More padding */
+
+            background-color: #ecf0f1;
+            /* Light gray background */
+
+            border: 1px solid #d0d0d0;
+            /* Lighter border */
+
+            border-radius: 5px;
+
+        }
+
+
+
+        .messages ul {
+
+            list-style: none;
+
+            padding: 0;
+
+            margin: 0;
+
+        }
+
+
+
+        .messages li {
+
+            margin-bottom: 8px;
+            /* More margin */
+
+            color: #777;
+            /* Lighter text color */
+
+        }
+    </style>
+
+</head>
+
+
+
+<body>
+
+    <div class="container">
+
+        <h1>Membership Renewal</h1>
+
+
+
+        {% with messages = get_flashed_messages() %}
+
+        {% if messages %}
+
+        <div class="messages">
+
+            <ul>
+
+                {% for message in messages %}
+
+                <li>{{ message }}</li>
+
+                {% endfor %}
+
+            </ul>
+
+        </div>
+
+        {% endif %}
+
+        {% endwith %}
+
+
+
+        <form method="POST">
+
+            <label for="name">Name:</label>
+
+            <input type="text" id="name" name="name" value="{{ membership.name }}" readonly><br><br>
+
+
+
+            <label for="contact_number">Contact Number:</label>
+
+            <input type="text" id="contact_number" name="contact_number" value="{{ membership.contact_no }}"
+                readonly><br><br>
+
+
+
+            <label for="email">Email:</label>
+
+            <input type="email" id="email" name="email" value="{{ membership.email }}" readonly><br><br>
+
+
+
+            <label for="previous_expiry_date">Previous Expiry Date:</label>
+
+            <input type="text" id="previous_expiry_date" name="previous_expiry_date"
+                value="{{ membership.membership_expiry_date }}" readonly><br><br>
+
+
+
+            <label for="new_expiry_date">New Expiry Date:</label>
+
+            <input type="date" id="new_expiry_date" name="new_expiry_date" readonly><br><br>
+
+
+
+            <input type="submit" value="Update">
+
+        </form>
+
+    </div>
+
+
+
+    <script>
+
+        window.addEventListener('DOMContentLoaded', (event) => {
+
+            const newExpiryDateInput = document.getElementById('new_expiry_date');
+
+
+
+            // Get today's date
+
+            const today = new Date();
+
+
+
+            // Calculate the date 365 days from today
+
+            const nextYear = new Date(today);
+
+            nextYear.setDate(today.getDate() + 365);
+
+
+
+
+
+            // Format the date as YYYY-MM-DD (required for <input type="date">)
+
+            const formattedDate = nextYear.toISOString().split('T')[0];
+
+
+
+            newExpiryDateInput.value = formattedDate;
+
+        });
+
+    </script>
+
+
+
+</body>
+
+
+
+</html>
