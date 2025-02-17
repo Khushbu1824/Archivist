@@ -7,10 +7,6 @@ import json
 
 app = Flask(__name__)
 app.secret_key = "12345"
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
 # Initialize the database when the app starts
 initialize_db()
 
@@ -20,7 +16,7 @@ def home():
 
 from peewee import fn
 
-@app.route('/admin')
+@app.route('/admin/2703')
 def admin():
     try:
         # Ensure database connection is open
@@ -71,7 +67,7 @@ def login():
 
     return render_template('login.html')
 
-@app.route('/admin/login', methods=['GET', 'POST'])
+@app.route('/admin/login/2703', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'POST':
         username = request.form['username']
