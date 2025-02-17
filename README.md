@@ -38,8 +38,8 @@ This is a comprehensive library management system built using Flask, Peewee ORM,
 
 1.  **Clone the Repository:**
     ```bash
-    git clone https://github.com/[username]/Library_management_application.git
-    cd Library_management_application/
+    git clone https://github.com/siddharthkhati/Archivist.git
+    cd Archivist/
     ```
 
 2.  **Create a Virtual Environment (Recommended):**
