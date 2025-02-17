@@ -77,6 +77,14 @@ def admin_login():
             return render_template('admin_login.html')
 
     return render_template('admin-login.html')
+
+@app.route('/books')
+def books():
+    # Retrieve all books from the database
+    books_list = Book.select()
+    authors = Book.select(Book.authors).distinct().scalars()
+    genres = Book.select(Book.genre).distinct().scalars()
+    return render_template("books.html", books=books_list, authors=authors, genres=genres)
     
 @app.route('/transactions', methods=['POST'])
 def transactions():
