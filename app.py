@@ -7,7 +7,10 @@ import json
 
 app = Flask(__name__)
 app.secret_key = "12345"
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 # Initialize the database when the app starts
 initialize_db()
 
@@ -112,7 +115,7 @@ def bookslist(membership_id):
     books_list = Book.select()
     authors = Book.select(Book.authors).distinct().scalars()
     genres = Book.select(Book.genre).distinct().scalars()
-    return render_template("books.html", books=books_list, authors=authors, genres=genres)
+    return render_template("books.html", books=books_list, authors=authors, genres=genres, membership_id=membership_id)
 
 @app.route('/add-book', methods=['GET', 'POST'])
 def add_book():
@@ -370,38 +373,30 @@ def membership_renewal(id):
             flash(f"An error occurred: {str(e)}")
             return render_template('membership-renewal.html', membership=membership)
 
-@app.route('/issued-books')
-def issued_books():
-    return render_template("success-page.html")
+@app.route('/issued_books/<int:membership_id>')
+def issued_books(membership_id):
+    return render_template("success-page.html", membership_id=membership_id)
 
-@app.route("/download/<int:membership_id>")
+@app.route("/download/<int:membership_id>", methods=["POST"])
 def download_pdf(membership_id):
     try:
-        membership = Membership.get_by_id(membership_id)  # Get membership details
+        membership = Membership.get_by_id(membership_id)
 
-        # issued_books_json = request.form.get("issuedBooks")
-        # if not issued_books_json:
-        #     return "No books provided", 400
+        # Retrieve issued books from form input
+        issued_books_json = request.form.get("issued_books")
+        if not issued_books_json:
+            return "No books provided", 400
 
-        # try:
-        #     issued_books = json.loads(issued_books_json)  # The book list is already what we need!
-
-        # except json.JSONDecodeError:
-        #     return "Invalid JSON data", 400
-
-        issued_books = [
-            {"title": "The Hitchhiker's Guide to the Galaxy", "authors": "Douglas Adams", "isbn": "978-0345391803"},
-            {"title": "Pride and Prejudice", "authors": "Jane Austen", "isbn": "978-0141439518"},
-            {"title": "To Kill a Mockingbird", "authors": "Harper Lee", "isbn": "978-0060935467"},
-            {"title": "1984", "authors": "George Orwell", "isbn": "978-0451524935"},
-            {"title": "The Lord of the Rings", "authors": "J.R.R. Tolkien", "isbn": "978-0547928227"},
-        ]
+        try:
+            issued_books = json.loads(issued_books_json)
+        except json.JSONDecodeError:
+            return "Invalid JSON data", 400
 
         html = HTML(string=render_template("print/invoice.html", membership=membership, issued_books=issued_books))
         response = make_response(html.write_pdf())
 
         response.headers["Content-Type"] = "application/pdf"
-        # response.headers["Content-Disposition"] = f'attachment; filename="issued_books_{membership_id}.pdf"'
+        response.headers["Content-Disposition"] = f'attachment; filename="issued_books_{membership_id}.pdf"'
 
         return response
 
@@ -413,16 +408,20 @@ def download_pdf(membership_id):
 if __name__ == '__main__':
     app.run(debug=True)
 
-@app.route("/issue-book/<int:membership_id>")
+@app.route("/issue-book/<int:membership_id>", methods=["POST"])
 def issue_book_form(membership_id):
-    # Get the membership and issued books details
-    membership = Membership.get_by_id(membership_id)  # Get member details
-    issued_books = [
-    {"book_id": 1, "title": "The Alchemist", "authors": "Paulo Coelho", "isbn": "9780061122415"},
-    {"book_id": 2, "title": "The Road", "authors": "Cormac McCarthy", "isbn": "9780307387899"},
-    {"book_id": 3, "title": "The Book Thief", "authors": "Markus Zusak", "isbn": "9780375842207"},
-]
+    issued_books_json = request.form.get("issuedBooks")
+    issued_books = []  # Initialize an empty list
 
+    if issued_books_json:
+        try:
+            issued_books = json.loads(issued_books_json)
+        except json.JSONDecodeError:
+            return "Invalid JSON data", 400
+
+    membership = Membership.get_by_id(membership_id)
+
+    # Now pass the potentially populated issued_books list to the template
     return render_template("transactions.html", membership=membership, issued_books=issued_books, membership_id=membership_id)
 
 @app.route("/process-transaction", methods=["POST"])
@@ -449,6 +448,7 @@ def process_transaction():
         if not book_ids:
             return "No books selected", 400  # Handle case if no book is selected
 
+        issued_books_list = []
         # Insert transactions for each selected book
         with db.atomic():
             for book_id in book_ids:
@@ -467,12 +467,19 @@ def process_transaction():
                     status=status
                 )
 
+                issued_books_list.append({
+                    "book_id": book_id,
+                    "title": book_title,
+                    "authors": book.authors,
+                    "isbn": isbn
+                })
+
         print("Data Inserted Successfully!")
-        return redirect(f"/issue-book/{user_id}")
+        return render_template("success-page.html", membership_id=user_id, issued_books=issued_books_list)
 
     except Exception as e:
         print(f"Error: {e}")
-        return redirect(f"/issue-book/{user_id}")
+        return redirect(url_for('books'))
 
     finally:
         if not db.is_closed():
