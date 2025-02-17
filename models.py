@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from peewee import Model, PostgresqlDatabase, CharField, IntegerField, FloatField, DateField, AutoField
+from peewee import Model, AutoField, PostgresqlDatabase, CharField, IntegerField, FloatField, DateField, AutoField, BlobField
 
 # Load environment variables from .env file
 load_dotenv()
@@ -33,7 +33,7 @@ class BaseModel(Model):
         database = db
 
 class Book(BaseModel):
-    book_id = IntegerField(primary_key=True)
+    book_id = AutoField() 
     title = CharField()
     authors = CharField()
     average_rating = FloatField()
@@ -46,14 +46,13 @@ class Book(BaseModel):
     publication_date = DateField()
     publisher = CharField()
 
-
 class Membership(BaseModel):
     membership_id = AutoField()
     name = CharField()
     dob = DateField()
     email = CharField(unique=True)
     contact_no = CharField()
-    password = CharField()
+    password = BlobField()
     address = CharField(null=True)  # Optional field
     membership_type = CharField()  # E.g., Student, Faculty, Guest
     membership_start_date = DateField()
@@ -62,5 +61,5 @@ class Membership(BaseModel):
 
 def initialize_db():
     db.connect()
-    db.create_tables([Book, Membership], safe=True)  # safe=True prevents errors if tables already exist
+    db.create_tables([Book, Membership, Admin], safe=True)  # safe=True prevents errors if tables already exist
     db.close()
