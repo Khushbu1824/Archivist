@@ -1,19 +1,18 @@
 from flask import Flask, render_template, request, redirect, flash, session, url_for, jsonify, make_response
 from bcrypt import hashpw, gensalt, checkpw
-from models import initialize_db, Book, Membership, Admin, db
+from models import initialize_db, Book, Membership, Admin, Transaction, db
 from datetime import datetime
 from weasyprint import HTML
 import json 
 
 app = Flask(__name__)
-app.secret_key = "12345"
 
 # Initialize the database when the app starts
 initialize_db()
 
 @app.route('/')
 def home():
-    return "Hello, Flask!"
+    return render_template("home.html")
 
 @app.route('/admin')
 def admin():
@@ -265,11 +264,9 @@ def register():
             )
         print("Data Inserted Successfully!")  # Debugging
 
-        flash("Registration successful!", "success")
         return redirect("/new-membership")
 
     except Exception as e:
-        flash(f"Error: {str(e)}", "danger")
         print(f"Database Error: {e}")  # Debugging
         return redirect("/new-membership")
     
@@ -395,3 +392,129 @@ def download_pdf(membership_id):
 if __name__ == '__main__':
     app.run(debug=True)
 
+@app.route("/issue-book/<int:membership_id>")
+def issue_book_form(membership_id):
+    # Get the membership and issued books details
+    membership = Membership.get_by_id(membership_id)  # Get member details
+    issued_books = [
+    {"book_id": 1, "title": "Placeholder Book", "authors": "Unknown Author", "isbn": "978-3-16-148410-0"},
+    {"book_id": 2, "title": "Book Title 1", "authors": "Author 1", "isbn": "978-1-23-456789-0"},
+    {"book_id": 3, "title": "Book Title 2", "authors": "Author 2", "isbn": "978-1-23-456789-1"},
+    {"book_id": 4, "title": "Book Title 3", "authors": "Author 3", "isbn": "978-1-23-456789-2"},
+    {"book_id": 5, "title": "Book Title 4", "authors": "Author 4", "isbn": "978-1-23-456789-3"},
+]
+
+    return render_template("transactions.html", membership=membership, issued_books=issued_books, membership_id=membership_id)
+
+@app.route("/process-transaction", methods=["POST"])
+def process_transaction():
+    try:
+        if db.is_closed():
+            db.connect()
+        
+        print("Form Data:", request.form)
+
+        user_id = int(request.form["membership_id"])  # Ensure integer conversion
+        issue_date = datetime.strptime(request.form["issue_date"], "%Y-%m-%d").date()
+        return_date = datetime.strptime(request.form["return_date"], "%Y-%m-%d").date()
+        status = request.form["status"]
+
+        book_ids = request.form.getlist("book_ids")  # Get a list of selected book IDs
+        print(f"Membership ID: {user_id}")
+        print(f"Book IDs: {book_ids}")
+        print(f"Issue Date: {issue_date}")
+        print(f"Return Date: {return_date}")
+        print(f"Status: {status}")
+
+
+        if not book_ids:
+            return "No books selected", 400  # Handle case if no book is selected
+
+        # Insert transactions for each selected book
+        with db.atomic():
+            for book_id in book_ids:
+                book_id = int(book_id)  # Ensure integer conversion
+                print(f"Attempting to insert: {book_id}, {user_id}, {issue_date}")
+                book = Book.get_by_id(book_id)  # Assuming Book has a `get_by_id` method
+                book_title = book.title
+                isbn = book.isbn
+                Transaction.create(
+                    user_id=user_id,
+                    book_id=book_id,
+                    title = book_title,
+                    isbn = isbn,
+                    issue_date=issue_date,
+                    return_date=return_date,
+                    status=status
+                )
+
+        print("Data Inserted Successfully!")
+        return redirect(f"/issue-book/{user_id}")
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return redirect(f"/issue-book/{user_id}")
+
+    finally:
+        if not db.is_closed():
+            db.close()
+
+@app.route("/return-books/<int:membership_id>")
+def return_books(membership_id):
+    if db.is_closed():
+        db.connect()
+
+    # Fetch books borrowed by the user
+    transactions = (
+        Transaction.select(Transaction.transaction_id, Book.book_id, Book.title, Book.authors)
+        .join(Book)
+        .where((Transaction.user_id == membership_id) & (Transaction.status == "Issued"))
+    )
+
+    books = [
+        {"transaction_id": t.transaction_id, "book_id": t.book.book_id, "title": t.book.title, "author": t.book.authors}
+        for t in transactions
+    ]
+
+    db.close()
+
+    return render_template("return-books.html", books=books)
+
+
+@app.route("/return-book", methods=["POST"])
+def return_book():
+    try:
+        transaction_id = request.form.get("transaction_id")
+
+        if db.is_closed():
+            db.connect()
+
+        # Delete the transaction (return the book)
+        deleted_rows = Transaction.delete().where(Transaction.transaction_id == transaction_id).execute()
+
+        db.close()
+
+        if deleted_rows > 0:
+            return jsonify({"success": True, "message": "Book returned successfully."})
+        else:
+            return jsonify({"success": False, "message": "Book not found."})
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)})
+
+@app.route("/like-book", methods=["POST"])
+def like_book():
+    try:
+        book_id = request.form.get("book_id")
+
+        if not book_id:
+            return jsonify({"success": False, "message": "Invalid book ID"}), 400
+
+        # Simulating a like action (you should store likes in the database)
+        return jsonify({"success": True})
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(debug=True)

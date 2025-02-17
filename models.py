@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from peewee import Model, AutoField, PostgresqlDatabase, CharField, IntegerField, FloatField, DateField, AutoField, BlobField
+from peewee import Model, AutoField, PostgresqlDatabase, CharField, IntegerField, FloatField, DateField, BlobField, ForeignKeyField
 
 # Load environment variables from .env file
 load_dotenv()
@@ -71,7 +71,18 @@ class Membership(BaseModel):
     membership_expiry_date = DateField()
     status = CharField(default="Active")  # Active, Inactive, Expired
 
+
+class Transaction(BaseModel):
+    transaction_id = AutoField()
+    user = ForeignKeyField(Membership, backref="transactions", on_delete="CASCADE")
+    book = ForeignKeyField(Book, backref="transactions", on_delete="CASCADE")
+    isbn = CharField()
+    title = CharField()
+    issue_date = DateField()
+    return_date = DateField(null=True)  # Nullable, as book may not be returned yet
+    status = CharField(default="Issued")  # "Issued" or "Returned"
+
 def initialize_db():
     db.connect()
-    db.create_tables([Book, Membership, Admin], safe=True)  # safe=True prevents errors if tables already exist
+    db.create_tables([Book, Membership, Admin, Transaction], safe=True)  # safe=True prevents errors if tables already exist
     db.close()

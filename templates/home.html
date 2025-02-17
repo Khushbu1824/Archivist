@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Library Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* Navbar */
+        .navbar {
+            height: 60px;
+            padding: 0 15px;
+        }
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        /* Slideshow */
+        .slideshow {
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+        .slideshow img {
+            width: 100%;
+            height: 100vh;
+            object-fit: cover;
+            position: absolute;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            filter: brightness(60%);
+        }
+        .slideshow img.active {
+            opacity: 1;
+        }
+        /* Most Liked Books Section */
+        .book-card {
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .book-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        .book-card img {
+            width: 100%;
+            height: 600px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        .book-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+        .book-card:hover .book-info {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .view-books-btn {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        /* Footer */
+        .footer {
+            background: #343a40;
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 40px;
+        }
+
+        .slideshow-text {
+            position: absolute;
+            top: 50%;
+            left: 40%;
+            transform: translate(-50%, -50%);
+            text-align: left;
+            color: white;
+            font-size: 3.25rem;
+            font-weight: bold;
+        }
+
+        .slideshow-subtext {
+            font-size: 1.3rem;
+            font-weight: 400;
+            display: block;
+            margin-top: 10px;
+            position: relative;
+        }
+        /* Fade-in Fade-out Animation */
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">Library</a>
+        <div>
+            <div class="btn" style="color: #fff; font-weight: 600; font-size: 16px;">
+                <a href="/" style="color : white; text-decoration: none; margin-right: 15px;">Home</a>
+                <a href="/books" style="color : white; text-decoration: none; margin-right: 15px;">Books</a>
+                <a href="/contact" style="color : white; text-decoration: none;">Contact Us</a>
+            </div>
+        </div>
+        <div>
+            <div class="btn" style="color: #fff; font-weight: 600; font-size: 16px;"><a href="/new-membership" style="color : white; text-decoration: none;">Membership</a> / <a href="/login" style="color : white; text-decoration: none;">Login</a></div>
+        </div>
+    </nav>
+
+    <!-- Slideshow -->
+    <div class="slideshow">
+        <img src="https://media.istockphoto.com/id/505551939/photo/library.jpg?s=612x612&w=0&k=20&c=lGwjpaVR2__plgaEeRiLZ0n1up16Zm3PW6zlR4paabI=" class="active" alt="Library Image 1">
+        <img src="https://images.pexels.com/photos/1290141/pexels-photo-1290141.jpeg" alt="Library Image 2">
+        <img src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da" alt="Library Image 3">
+        <div class="slideshow-text">
+            Welcome to our Digital Library <i class="fas fa-book-open"></i>
+            <div class="slideshow-subtext">Explore a vast collection of books, dive into endless knowledge, and grow your understanding <br>with our diverse library resources</div>
+        </div>        
+    </div>
+
+    <!-- Most Liked Books Section -->
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Most Liked Books 📚</h2>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card book-card">
+                    <img src="https://m.media-amazon.com/images/I/81FPzmB5fgL.jpg" alt="The Alchemist">
+                    <div class="book-info">
+                        <h5>The Alchemist</h5>
+                        <p>By Paulo Coelho</p>
+                        <p>❤️ 120 Likes</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card book-card">
+                    <img src="https://m.media-amazon.com/images/I/81gepf1eMqL.jpg" alt="To Kill a Mockingbird">
+                    <div class="book-info">
+                        <h5>To Kill a Mockingbird</h5>
+                        <p>By Harper Lee</p>
+                        <p>❤️ 150 Likes</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card book-card">
+                    <img src="https://m.media-amazon.com/images/I/81F90H7hnML.jpg" alt="Atomic Habits">
+                    <div class="book-info">
+                        <h5>Atomic Habits</h5>
+                        <p>By James Clear</p>
+                        <p>❤️ 180 Likes</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="view-books-btn">
+            <a href="/books" class="btn" style="background-color: #0e0e55; color: #fff;">View Books</a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container d-flex justify-content-between">
+            <div>
+                <p>Contact Us: +91 9876543210 | Email: support@library.com</p>
+            </div>
+            <div class="text-end">
+                <p>"Unlock the world of knowledge, one book at a time."</p>
+                <p>&copy; 2025 Library Management</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Slideshow logic
+        let slides = document.querySelectorAll('.slideshow img');
+        let currentIndex = 0;
+        function showNextSlide() {
+            slides[currentIndex].classList.remove('active');
+            currentIndex = (currentIndex + 1) % slides.length;
+            slides[currentIndex].classList.add('active');
+        }
+        setInterval(showNextSlide, 3000);
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
