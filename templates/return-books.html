@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,20 +13,38 @@
             background-color: #28a745 !important;
             color: white !important;
         }
+
         .liked {
             background-color: #ff4d6d !important;
             color: white !important;
             border-color: #ff4d6d !important;
         }
+
         .like-btn i {
             transition: transform 0.3s ease-in-out, color 0.3s ease-in-out;
         }
+
         .like-btn.liked i {
             transform: scale(1.3);
             color: white;
         }
+
+        .star {
+            font-size: 1.5em;
+            cursor: pointer;
+            color: black;
+        }
+
+        .star.hovered {
+            color: yellow;
+        }
+
+        .star.selected {
+            color: yellow;
+        }
     </style>
 </head>
+
 <body class="container mt-4">
     <h2 class="text-center mb-4">Books Issued</h2>
 
@@ -46,12 +65,24 @@
                 <td>{{ book.title }}</td>
                 <td>{{ book.author }}</td>
                 <td>
+                    <!-- Return button -->
                     <button class="btn btn-danger return-btn" data-transaction="{{ book.transaction_id }}">
                         Return
                     </button>
-                    <button class="btn btn-outline-danger like-btn" data-book="{{ book.book_id }}">
+
+                    <!-- Like button -->
+                    <button class="btn btn-outline-danger like-btn" data-book="{{ book.book_id }}" data-liked="false">
                         <i class="bi bi-heart"></i> Like
                     </button>
+
+                    <!-- Star rating system -->
+                    <div class="rating" id="rating-{{ book.transaction_id }}">
+                        <span class="star" data-value="1">&#9733;</span>
+                        <span class="star" data-value="2">&#9733;</span>
+                        <span class="star" data-value="3">&#9733;</span>
+                        <span class="star" data-value="4">&#9733;</span>
+                        <span class="star" data-value="5">&#9733;</span>
+                    </div>
                 </td>
             </tr>
             {% endfor %}
@@ -61,19 +92,104 @@
     <p class="text-center text-muted">No books to return.</p>
     {% endif %}
 
+    <!-- Modal for Fine Display -->
+    <div class="modal fade" id="fineModal" tabindex="-1" aria-labelledby="fineModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="fineModalLabel">Book Return Fine</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="fine-message"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        $(document).ready(function() {
-            // Handle return button
-            $(".return-btn").click(function() {
+        $(document).ready(function () {
+            // Handle like button click
+            $(".like-btn").click(function () {
+                var btn = $(this);
+                var bookId = btn.data("book");
+                var icon = btn.find("i");
+
+                btn.toggleClass("liked");
+
+                if (btn.hasClass("liked")) {
+                    icon.removeClass("bi-heart").addClass("bi-heart-fill");
+                    btn.html('<i class="bi bi-heart-fill"></i> Liked');
+                    btn.attr("data-liked", "true");  // Mark book as liked
+                } else {
+                    icon.removeClass("bi-heart-fill").addClass("bi-heart");
+                    btn.html('<i class="bi bi-heart"></i> Like');
+                    btn.attr("data-liked", "false");  // Mark book as unliked
+                }
+            });
+
+            // Handle hover effect for star rating
+            $(".star").hover(
+                function () {
+                    var ratingValue = $(this).data("value");
+                    var ratingDiv = $(this).closest('.rating');
+                    ratingDiv.find(".star").each(function (index) {
+                        if (index < ratingValue) {
+                            $(this).addClass("hovered");
+                        } else {
+                            $(this).removeClass("hovered");
+                        }
+                    });
+                },
+                function () {
+                    $(this).closest('.rating').find(".star").removeClass("hovered");
+                }
+            );
+
+            // Handle star click event to set rating
+            $(".star").click(function () {
+                var ratingValue = $(this).data("value");
+                var ratingDiv = $(this).closest('.rating');
+                ratingDiv.find(".star").each(function (index) {
+                    if (index < ratingValue) {
+                        $(this).addClass("selected");
+                    } else {
+                        $(this).removeClass("selected");
+                    }
+                });
+            });
+
+            // Handle return button click
+            $(".return-btn").click(function () {
                 var btn = $(this);
                 var transactionId = btn.data("transaction");
+                var likeBtn = $("#row-" + transactionId).find(".like-btn");
+                var bookId = likeBtn.data("book");
+                var wasLiked = likeBtn.attr("data-liked") === "true";  // Check if book was liked
 
-                $.post("/return-book", { transaction_id: transactionId }, function(response) {
+                // Get the selected rating (count how many stars are selected)
+                var rating = $("#rating-" + transactionId).find(".star.selected").length;
+
+                $.post("/return-book", { 
+                    transaction_id: transactionId, 
+                    liked: wasLiked, 
+                    book_id: bookId,
+                    rating: rating  // Send the rating
+                }, function (response) {
                     if (response.success) {
                         btn.removeClass("btn-danger").addClass("returned").text("Returned");
 
-                        setTimeout(function() {
-                            $("#row-" + transactionId).fadeOut("slow", function() {
+                        // If there is a fine, show the modal with the fine message
+                        if (response.fine > 0) {
+                            $("#fine-message").text("You have a fine of ₹" + response.fine + " for this book.");
+                            $('#fineModal').modal('show');  // Show the modal
+                        }
+
+                        setTimeout(function () {
+                            $("#row-" + transactionId).fadeOut("slow", function () {
                                 $(this).remove();
                             });
                         }, 2000);
@@ -82,30 +198,11 @@
                     }
                 });
             });
-
-            // Handle like button
-            $(".like-btn").click(function() {
-                var btn = $(this);
-                var bookId = btn.data("book");
-                var icon = btn.find("i");
-
-                $.post("/like-book", { book_id: bookId }, function(response) {
-                    if (response.success) {
-                        btn.toggleClass("liked");
-
-                        if (btn.hasClass("liked")) {
-                            icon.removeClass("bi-heart").addClass("bi-heart-fill");
-                            btn.html('<i class="bi bi-heart-fill"></i> Liked');
-                        } else {
-                            icon.removeClass("bi-heart-fill").addClass("bi-heart");
-                            btn.html('<i class="bi bi-heart"></i> Like');
-                        }
-                    } else {
-                        alert("Error: " + response.message);
-                    }
-                });
-            });
         });
     </script>
+
+    <!-- Bootstrap 5 JS (necessary for modal to work) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
