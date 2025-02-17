@@ -292,6 +292,38 @@ def delete_member(membership_id):
     member.delete_instance()
     return redirect(url_for('members')) 
 
+@app.route('/edit-member/<int:member_id>', methods=['GET', 'POST'])
+def edit_member(member_id):
+    try:
+        member = Membership.get(Membership.membership_id == member_id)  # Correct way to get the member
+    except Membership.DoesNotExist:  # Correct exception to catch
+        flash("Member not found!", "danger")
+        return redirect(url_for('members'))  # Redirect to the correct route
+
+    if request.method == 'POST':
+        member.name = request.form['name']  # Access attributes through the member object
+        try:
+            member.dob = datetime.strptime(request.form['dob'], '%Y-%m-%d').date()
+        except ValueError:
+            flash("Invalid date of birth format!", "danger")
+            return render_template('edit-member.html', member=member)  # Pass the member object
+
+        member.email = request.form['email']
+        member.contact_no = request.form['contact_no']
+        member.address = request.form['address']
+        member.status = request.form['status']
+
+        if 'password' in request.form and request.form['password']:
+            new_password = request.form['password']
+            hashed_password_bytes = hashpw(new_password.encode('utf-8'), gensalt())
+            member.password = hashed_password_bytes
+
+        member.save()
+        flash("Member updated successfully!", "success")
+        return redirect(url_for('members'))  # Redirect to the correct route
+
+    return render_template('edit-member.html', member=member) 
+    
 if __name__ == '__main__':
     app.run(debug=True)
 
