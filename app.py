@@ -154,6 +154,41 @@ def add_book():
                 db.close()
 
     return render_template('add-book.html')
+
+@app.route('/edit-book/<int:book_id>', methods=['GET', 'POST'])
+def edit_book(book_id):
+    try:
+        book = Book.get(Book.book_id == book_id)  # Fetch the book FIRST
+    except Book.DoesNotExist:
+        flash("Book not found!", "danger")
+        return redirect(url_for('books'))  # Redirect to books list, not home
+
+    if request.method == 'POST':
+        book.title = request.form['title']
+        book.authors = request.form['authors']
+        book.average_rating = request.form['average_rating']
+        book.isbn = request.form['isbn']
+        book.isbn13 = request.form['isbn13']
+        book.language_code = request.form['language_code']
+        book.num_pages = request.form['num_pages']
+        book.ratings_count = request.form['ratings_count']
+        book.text_reviews_count = request.form['text_reviews_count']
+        try:  # Handle potential date parsing errors
+            book.publication_date = datetime.strptime(request.form['publication_date'], '%Y-%m-%d').date()
+        except ValueError:
+            flash("Invalid publication date format!", "danger")
+            return render_template('edit-book.html', book=book) #re-render the form with error
+
+        book.publisher = request.form['publisher']
+        book.genre = request.form['genre']
+        book.likes = request.form['likes']
+        book.book_image = request.form['book_image']
+
+        book.save()
+        flash("Book updated successfully!", "success")
+        return redirect(url_for('books'))  # Redirect back to the book list
+
+    return render_template('edit-book.html', book=book)
     
 @app.route('/transactions', methods=['POST'])
 def transactions():
