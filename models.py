@@ -45,6 +45,10 @@ class Book(BaseModel):
     text_reviews_count = IntegerField()
     publication_date = DateField()
     publisher = CharField()
+    genre = CharField()
+    likes = IntegerField(default=0)
+    book_image = CharField(null=True)
+    num_books_available = IntegerField(default=0)
 
 class Membership(BaseModel):
     membership_id = AutoField()
