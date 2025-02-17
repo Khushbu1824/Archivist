@@ -351,7 +351,11 @@ def membership_renewal(id):
         except Exception as e:
             flash(f"An error occurred: {str(e)}")
             return render_template('membership-renewal.html', membership=membership)
-            
+
+@app.route('/issued-books')
+def issued_books():
+    return render_template("success-page.html")
+    
 if __name__ == '__main__':
     app.run(debug=True)
 
