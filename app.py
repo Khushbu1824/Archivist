@@ -277,6 +277,11 @@ def register():
         if not db.is_closed():
             db.close()  # Close connection after operation
 
+@app.route('/members')
+def members():
+    members_ls = Membership.select()
+    return render_template('members.html', members=members_ls)
+    
 if __name__ == '__main__':
     app.run(debug=True)
 
