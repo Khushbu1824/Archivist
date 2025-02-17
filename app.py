@@ -189,6 +189,11 @@ def edit_book(book_id):
         return redirect(url_for('books'))  # Redirect back to the book list
 
     return render_template('edit-book.html', book=book)
+
+@app.route('/librarian_books')
+def librarian_books():
+    books_ls = Book.select()
+    return render_template('librarian-books.html', books=books_ls)
     
 @app.route('/transactions', methods=['POST'])
 def transactions():
