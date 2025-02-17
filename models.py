@@ -2,22 +2,30 @@ import os
 from dotenv import load_dotenv
 from peewee import Model, PostgresqlDatabase, CharField, IntegerField, FloatField, DateField, AutoField
 
+# Load environment variables from .env file
 load_dotenv()
 
+# Ensure all required database credentials are loaded
 DATABASE = {
     'name': os.getenv('DB_NAME'),
     'user': os.getenv('DB_USER'),
     'password': os.getenv('DB_PASSWORD'),
     'host': os.getenv('DB_HOST'),
-    'port': int(os.getenv('DB_PORT'))
+    'port': os.getenv('DB_PORT')
 }
 
+# Check if all required environment variables are set
+missing_vars = [key for key, value in DATABASE.items() if value is None]
+if missing_vars:
+    raise ValueError(f"Missing environment variables: {', '.join(missing_vars)}")
+
+# Connect to the PostgreSQL database
 db = PostgresqlDatabase(
     DATABASE['name'],
     user=DATABASE['user'],
     password=DATABASE['password'],
     host=DATABASE['host'],
-    port=DATABASE['port']
+    port=int(DATABASE['port'])
 )
 
 class BaseModel(Model):
