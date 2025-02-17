@@ -18,6 +18,35 @@ def home():
 @app.route('/admin')
 def admin():
     return render_template('admin.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+
+        membership = Membership.get_or_none(Membership.email == email)
+
+        if membership:
+            stored_hash = membership.password
+
+            entered_password_encoded = password.encode('utf-8')
+
+            # Decode the stored hash from memoryview to bytes if needed
+            if isinstance(stored_hash, memoryview):
+                stored_hash = bytes(stored_hash)  # Convert memoryview to bytes
+
+            if checkpw(entered_password_encoded, stored_hash):
+                session['user_id'] = membership.membership_id  # Store user_id in session
+                return redirect(url_for('bookslist', membership_id=membership.membership_id))
+            else:
+                error_message = 'Incorrect password'
+        else:
+            error_message = 'User not found'
+
+        return render_template('login.html', error_message=error_message)
+
+    return render_template('login.html')
     
 @app.route('/transactions', methods=['POST'])
 def transactions():
