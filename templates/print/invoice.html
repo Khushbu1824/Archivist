@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issued Books Invoice</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .invoice-container {
+            width: 85%;
+            max-width: 900px;
+            margin: auto;
+            padding: 20px;
+            border: 2px solid #1a237e;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+            background: #fff;
+        }
+
+        .invoice-header {
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #1a237e;
+        }
+
+        .invoice-header h1 {
+            color: #1a237e;
+            font-size: 28px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 5px 0;
+        }
+
+        .invoice-header p {
+            font-size: 16px;
+            color: #555;
+            margin: 5px 0;
+        }
+
+        .invoice-details {
+            margin: 15px 0;
+            padding: 10px;
+            border-left: 4px solid #1a237e;
+            background: #f2f4f8;
+            border-radius: 5px;
+        }
+
+        .invoice-details p {
+            margin: 4px 0;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .invoice-table th,
+        .invoice-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .invoice-table th {
+            background: #1a237e;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .invoice-table tbody tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 15px;
+            padding-top: 8px;
+            border-top: 2px solid #1a237e;
+            font-size: 14px;
+            color: #444;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="invoice-container">
+        <div class="invoice-header">
+            <h1>Issued Books Invoice</h1>
+            <p><strong>Library Name:</strong> Your Library</p>
+        </div>
+
+        <div class="invoice-details">
+            <p><strong>Member Name:</strong> {{ membership.name }}</p>
+            <p><strong>Address:</strong> {{ membership.address }}</p>
+            <p><strong>Contact Number:</strong> {{ membership.contact_no }}</p>
+            <p><strong>Membership ID:</strong> {{ membership.membership_id }}</p>
+            <p><strong>Date:</strong> <span id="current-date"></span></p>
+        </div>
+
+        <table class="invoice-table">
+            <thead>
+                <tr>
+                    <th>S No.</th>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>ISBN</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for book in issued_books %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ book.title }}</td>
+                    <td>{{ book.authors }}</td>
+                    <td>{{ book.isbn }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="footer">
+            <p>Thank you for using our library services!</p>
+            <p>For inquiries, contact us at <strong>library@example.com</strong></p>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentDateSpan = document.getElementById("current-date");
+            if (currentDateSpan) {
+                const today = new Date();
+                const formattedDate = today.toLocaleDateString("en-GB"); // Or your preferred locale
+                currentDateSpan.textContent = formattedDate;
+            } else {
+                console.error("Element with ID 'current-date' not found.");
+            }
+        });
+    </script>
+</body>
+
+
+</html>
