@@ -323,7 +323,35 @@ def edit_member(member_id):
         return redirect(url_for('members'))  # Redirect to the correct route
 
     return render_template('edit-member.html', member=member) 
-    
+
+@app.route('/membership-renewal/<int:id>', methods=['GET', 'POST'])
+def membership_renewal(id):
+    try:
+        membership = Membership.get_by_id(id)
+    except Membership.DoesNotExist:
+        flash("Membership record not found.")
+        return redirect(url_for('books'))
+
+    if request.method == 'GET':
+        return render_template('membership-renewal.html', membership=membership)
+
+    elif request.method == 'POST':
+        try:
+            new_expiry_date_str = request.form.get('new_expiry_date')
+            new_expiry_date = datetime.strptime(new_expiry_date_str, '%Y-%m-%d').date() # Corrected line
+
+            membership.membership_expiry_date = new_expiry_date
+            membership.save()
+            flash("Membership updated successfully!")
+            return redirect(url_for('books'))
+
+        except ValueError:
+            flash("Invalid date format. Please use YYYY-MM-DD.")
+            return render_template('membership-renewal.html', membership=membership)
+        except Exception as e:
+            flash(f"An error occurred: {str(e)}")
+            return render_template('membership-renewal.html', membership=membership)
+            
 if __name__ == '__main__':
     app.run(debug=True)
 
