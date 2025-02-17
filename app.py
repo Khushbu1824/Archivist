@@ -6,6 +6,7 @@ from weasyprint import HTML
 import json 
 
 app = Flask(__name__)
+app.secret_key = "12345"
 
 # Initialize the database when the app starts
 initialize_db()
@@ -14,9 +15,29 @@ initialize_db()
 def home():
     return render_template("home.html")
 
+from peewee import fn
+
 @app.route('/admin')
 def admin():
-    return render_template('admin.html')
+    try:
+        # Ensure database connection is open
+        if db.is_closed():
+            db.connect()
+
+        # Calculate the total number of books by summing up the number of available books from the Book table
+        total_books = Book.select(fn.SUM(Book.num_books_available)).scalar()
+
+        # Calculate the total number of members by counting the rows in the Membership table
+        total_members = Membership.select().count()
+
+        # Calculate the total number of borrowed books by counting the transactions in the Transaction table
+        borrowed_books = Transaction.select().where(Transaction.status == 'borrowed').count()
+
+        # Return the data to the template
+        return render_template('admin.html', total_books=total_books, total_members=total_members, borrowed_books=borrowed_books)
+    except Exception as e:
+        return render_template('admin.html', error=str(e))
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -397,11 +418,9 @@ def issue_book_form(membership_id):
     # Get the membership and issued books details
     membership = Membership.get_by_id(membership_id)  # Get member details
     issued_books = [
-    {"book_id": 1, "title": "Placeholder Book", "authors": "Unknown Author", "isbn": "978-3-16-148410-0"},
-    {"book_id": 2, "title": "Book Title 1", "authors": "Author 1", "isbn": "978-1-23-456789-0"},
-    {"book_id": 3, "title": "Book Title 2", "authors": "Author 2", "isbn": "978-1-23-456789-1"},
-    {"book_id": 4, "title": "Book Title 3", "authors": "Author 3", "isbn": "978-1-23-456789-2"},
-    {"book_id": 5, "title": "Book Title 4", "authors": "Author 4", "isbn": "978-1-23-456789-3"},
+    {"book_id": 1, "title": "The Alchemist", "authors": "Paulo Coelho", "isbn": "9780061122415"},
+    {"book_id": 2, "title": "The Road", "authors": "Cormac McCarthy", "isbn": "9780307387899"},
+    {"book_id": 3, "title": "The Book Thief", "authors": "Markus Zusak", "isbn": "9780375842207"},
 ]
 
     return render_template("transactions.html", membership=membership, issued_books=issued_books, membership_id=membership_id)
@@ -481,40 +500,83 @@ def return_books(membership_id):
     return render_template("return-books.html", books=books)
 
 
+
+from datetime import datetime
+
 @app.route("/return-book", methods=["POST"])
 def return_book():
     try:
         transaction_id = request.form.get("transaction_id")
+        liked = request.form.get("liked") == "true"
+        book_id = request.form.get("book_id")
+        rating = int(request.form.get("rating", 0))  # Get the rating (0 if not provided)
 
         if db.is_closed():
             db.connect()
 
+        # Fetch the transaction details to get the return date
+        transaction = Transaction.select().where(Transaction.transaction_id == transaction_id).first()
+
+        if not transaction:
+            db.close()
+            return jsonify({"success": False, "message": "Transaction not found."})
+
+        # Get the return date from the transaction and convert it to datetime
+        return_date = transaction.return_date
+        if isinstance(return_date, datetime):
+            return_date = return_date.date()  # Ensure it's a date object
+        return_date = datetime.combine(return_date, datetime.min.time())  # Convert to datetime
+
+        current_date = datetime.now()
+
+        # Initialize fine variable
+        fine = 0
+
+        # Check if the return date has passed
+        if return_date < current_date:
+            # Calculate the number of days the book is overdue
+            overdue_days = (current_date - return_date).days
+
+            # Fine is calculated as 100 + (overdue_days * 10)
+            fine = 100 + (overdue_days * 10)
+
         # Delete the transaction (return the book)
         deleted_rows = Transaction.delete().where(Transaction.transaction_id == transaction_id).execute()
 
-        db.close()
-
         if deleted_rows > 0:
-            return jsonify({"success": True, "message": "Book returned successfully."})
+            # Update the number of available books
+            Book.update(num_books_available=Book.num_books_available + 1).where(Book.book_id == book_id).execute()
+
+            # If the book was liked, increment the like count
+            if liked:
+                Book.update(likes=Book.likes + 1).where(Book.book_id == book_id).execute()
+
+            # If the rating is provided, update the rating count and average rating
+            if rating > 0:
+                book = Book.get(Book.book_id == book_id)
+
+                # Calculate new average rating
+                new_rating_count = book.ratings_count + 1
+                new_total_rating = (book.average_rating * book.ratings_count) + rating
+                new_average_rating = new_total_rating / new_rating_count
+
+                # Update ratings count and average rating in the Book table
+                Book.update(
+                    ratings_count=new_rating_count,
+                    average_rating=new_average_rating
+                ).where(Book.book_id == book_id).execute()
+
+            db.close()
+
+            return jsonify({"success": True, "message": "Book returned successfully.", "fine": fine})
         else:
-            return jsonify({"success": False, "message": "Book not found."})
+            db.close()
+            return jsonify({"success": False, "message": "Transaction not found."})
 
     except Exception as e:
+        db.close()
         return jsonify({"success": False, "message": str(e)})
 
-@app.route("/like-book", methods=["POST"])
-def like_book():
-    try:
-        book_id = request.form.get("book_id")
-
-        if not book_id:
-            return jsonify({"success": False, "message": "Invalid book ID"}), 400
-
-        # Simulating a like action (you should store likes in the database)
-        return jsonify({"success": True})
-
-    except Exception as e:
-        return jsonify({"success": False, "message": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
