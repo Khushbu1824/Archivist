@@ -281,7 +281,17 @@ def register():
 def members():
     members_ls = Membership.select()
     return render_template('members.html', members=members_ls)
-    
+
+@app.route('/delete-member/<int:membership_id>')
+def delete_member(membership_id):
+    member = Membership.get_or_none(Membership.membership_id == membership_id)  # Assuming your Member model has a member_id
+
+    if member is None:
+        return "Member not found", 404
+
+    member.delete_instance()
+    return redirect(url_for('members')) 
+
 if __name__ == '__main__':
     app.run(debug=True)
 
