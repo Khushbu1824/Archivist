@@ -38,7 +38,7 @@ This is a comprehensive library management system built using Flask, Peewee ORM,
 
 1.  **Clone the Repository:**
     ```bash
-    git clone https://github.com/siddharthkhati/Library_management_application.git
+    git clone https://github.com/[username]/Library_management_application.git
     cd Library_management_application/
     ```
 
@@ -59,7 +59,7 @@ This is a comprehensive library management system built using Flask, Peewee ORM,
 
 5.  **Run the Application:**
     ```bash
-    python app.py
+    flask run 
     ```
 
 ## Usage 🚀
