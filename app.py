@@ -194,7 +194,17 @@ def edit_book(book_id):
 def librarian_books():
     books_ls = Book.select()
     return render_template('librarian-books.html', books=books_ls)
-    
+
+@app.route('/delete-book/<int:book_id>')
+def delete_book(book_id):
+    book = Book.get_or_none(Book.book_id == book_id)
+
+    if book is None:
+        return "Book not found", 404
+
+    book.delete_instance()  # Delete the book
+    return redirect(url_for('librarian_books'))
+
 @app.route('/transactions', methods=['POST'])
 def transactions():
     issued_books_json = request.form.get("issuedBooks")
