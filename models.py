@@ -31,6 +31,14 @@ db = PostgresqlDatabase(
 class BaseModel(Model):
     class Meta:
         database = db
+        
+class Admin(BaseModel):
+    admin_id = AutoField()
+    username = CharField(unique=True)
+    password = BlobField()  
+    email = CharField(unique=True)
+    image_url = CharField(null=True)  
+    contact_no = CharField()
 
 class Book(BaseModel):
     book_id = AutoField() 
