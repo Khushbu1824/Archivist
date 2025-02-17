@@ -487,11 +487,11 @@
                                 </div>
                             </div>
 
-                            <a id="renewalLink" href="{{ url_for('books') }}" class="btn"
+                            <a id="renewalLink" href="/membership-renewal/{{ membership_id }}" class="btn"
                                 style="background-color: #0e0e55; color: #fff;">Membership Renewal</a>
-                            <a id="returnLink" href="{{ url_for('books') }}" class="btn"
+                            <a id="returnLink" href="/return-books/{{ membership_id }}" class="btn"
                                 style="background-color: #0e0e55; color: #fff;">Return Books</a>
-                            <form id="transactionForm" action="/transactions" method="POST">
+                            <form id="transactionForm" action="/issue-book/{{ membership_id }}" method="POST">
                                 <input type="hidden" name="issuedBooks" id="issuedBooksInput">
                                 <button type="submit" class="btn" style="position: relative;">
                                     <i class="fas fa-book-open"></i>
@@ -553,7 +553,7 @@
                                 </div>
                                 {% if book.num_books_available > 0 %}
                                 <button id="issue-btn-{{ book.book_id }}" class="issue-btn"
-                                    onclick="issueBook('{{ book.book_id }}')">
+                                    onclick="issueBook('{{ book.book_id }}', '{{ book.title }}', '{{ book.authors }}', '{{ book.isbn }}')">
                                     Issue Book
                                 </button>
                                 {% endif %}
@@ -572,16 +572,17 @@
 <script>
     let issuedBooks = [];
 
-    function issueBook(bookId) {
-        const button = document.getElementById(`issue-btn-${bookId}`);
+    function issueBook(book_id, title, authors, isbn) {  // Add parameters for title, authors, isbn
+        const button = document.getElementById(`issue-btn-${book_id}`);
 
-        if (!issuedBooks.some(book => book.bookId === bookId)) {
-            issuedBooks.push({ bookId: bookId });
+        if (!issuedBooks.some(book => book.book_id === book_id)) {
+            issuedBooks.push({ book_id: book_id, title: title, authors: authors, isbn: isbn }); // Include book details
 
             button.innerText = "Issued";
             button.classList.add("issued-btn");
             button.disabled = true;
 
+            console.log(issuedBooks);
             document.getElementById("issuedBooksInput").value = JSON.stringify(issuedBooks);
             updateIssuedCount();
         }
@@ -628,14 +629,21 @@
 
 
         // 3. Prevent Form Submission (Corrected)
-        document.getElementById("transactionForm").addEventListener("submit", function (event) {
+        const transactionForm = document.getElementById("transactionForm");
+        transactionForm.addEventListener("submit", function (event) {
+            event.preventDefault(); // Prevent default form submission
+
             if (!userId) {
-                    event.preventDefault();
-                    alert("You must be logged in to issue books.");
-                } else if (issuedBooks.length === 0) {
-                    event.preventDefault();
-                    alert("No books issued!");
-                }
+                alert("You must be logged in to issue books.");
+                return; // Stop further execution
+            } else if (issuedBooks.length === 0) {
+                alert("No books issued!");
+                return; // Stop further execution
+            }
+
+            // If logged in and books are issued, proceed with redirect
+            document.getElementById("issuedBooksInput").value = JSON.stringify(issuedBooks);
+            transactionForm.submit(); // Programmatically submit the form
         });
 
         const pathParts = window.location.pathname.split('/'); // Split the path by '/'
@@ -648,7 +656,7 @@
             issueButtons.forEach(button => {
                 button.style.display = 'none';
             });
-            renewalLink.style.display = 'none'; 
+            renewalLink.style.display = 'none';
             returnLink.style.display = 'none';
         }
 
