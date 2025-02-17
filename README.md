@@ -97,7 +97,7 @@ The database consists of the following tables:
 
 ### Home Page
 
-![Home Page 1](images/home1.png)  *(Use relative path from README to image)*
+![Home Page 1](images/home1.png)  
 ![Home Page 2](images/home2.png)
 
 *   Description: "The home page welcomes users with a captivating image of a classic library interior, creating an inviting atmosphere. It features a prominent welcome message and navigation links to key sections of the library system." 
