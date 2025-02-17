@@ -93,6 +93,67 @@ def bookslist(membership_id):
     authors = Book.select(Book.authors).distinct().scalars()
     genres = Book.select(Book.genre).distinct().scalars()
     return render_template("books.html", books=books_list, authors=authors, genres=genres)
+
+@app.route('/add-book', methods=['GET', 'POST'])
+def add_book():
+    if request.method == 'POST':
+        try:
+            if db.is_closed():
+                db.connect()
+
+            title = request.form['title']
+            authors = request.form['authors']
+            average_rating = request.form.get('average_rating')
+            isbn = request.form['isbn']
+            isbn13 = request.form['isbn13']
+            language_code = request.form['language_code']
+            num_pages = request.form['num_pages']
+            ratings_count = request.form.get('ratings_count')
+            text_reviews_count = request.form.get('text_reviews_count')
+            publication_date_str = request.form['publication_date']
+
+            try:
+                publication_date = datetime.strptime(publication_date_str, '%Y-%m-%d').date()
+            except ValueError:
+                flash("Invalid publication date format!", "danger")
+                return render_template('add-book.html')
+
+            publisher = request.form['publisher']
+            genre = request.form['genre']
+            book_image = request.form['book_image']
+            likes = request.form.get('likes')
+
+            with db.atomic():
+                Book.create(
+                    title=title,
+                    authors=authors,
+                    average_rating=float(average_rating) if average_rating else 0.0,
+                    isbn=isbn,
+                    isbn13=isbn13,
+                    language_code=language_code,
+                    num_pages=int(num_pages) if num_pages else 0,  # Replace None with 0
+                    ratings_count=int(ratings_count) if ratings_count else 0,  # Replace None with 0
+                    text_reviews_count=int(text_reviews_count) if text_reviews_count else 0,  # Replace None with 0
+                    publication_date=publication_date,
+                    publisher=publisher,
+                    genre=genre,
+                    likes=int(likes) if likes else 0,
+                    book_image=book_image
+                )
+
+            flash("Book added successfully!", "success")
+            return redirect(url_for('books'))
+
+        except Exception as e:
+            flash(f"Error adding book: {str(e)}", "danger")
+            print(f"Error: {e}")
+            return render_template('add-book.html')
+
+        finally:
+            if not db.is_closed():
+                db.close()
+
+    return render_template('add-book.html')
     
 @app.route('/transactions', methods=['POST'])
 def transactions():
