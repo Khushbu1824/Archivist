@@ -47,6 +47,36 @@ def login():
         return render_template('login.html', error_message=error_message)
 
     return render_template('login.html')
+
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        admin = Admin.get_or_none(Admin.username == username)
+
+        if admin:
+            stored_hash = admin.password
+
+            entered_password_encoded = password.encode('utf-8')
+
+            if isinstance(stored_hash, memoryview):
+                stored_hash = bytes(stored_hash)
+
+
+            if checkpw(entered_password_encoded, stored_hash):
+                session['admin_logged_in'] = True  # Set session variable
+                session['user_type'] = 'admin' #Set user type to admin in session
+                return redirect(url_for('librarian_books'))  # Redirect to admin dashboard
+            else:
+                flash("Invalid username or password")
+                return render_template('admin_login.html')  # Re-render login form
+        else:
+            flash("Invalid username or password")
+            return render_template('admin_login.html')
+
+    return render_template('admin-login.html')
     
 @app.route('/transactions', methods=['POST'])
 def transactions():
