@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to right, #667eea, #764ba2); /* Gradient background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            color: #fff; /* White text */
+        }
+
+        .login-container {
+            width: 550px;
+            padding: 40px;
+            background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent white background */
+            border-radius: 16px;
+            backdrop-filter: blur(10px); /* Blur effect */
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Deeper shadow */
+            border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle white border */
+        }
+
+        .login-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #fff;
+            font-weight: 700;
+            font-size: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-control {
+            background-color: rgba(255, 255, 255, 0.05); /* Semi-transparent input background */
+            border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3); /* Subtle white border */
+            border-radius: 0;
+            padding: 15px 0;
+            color: #fff; /* White input text */
+            transition: border-color 0.3s ease;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .form-control:focus {
+            border-bottom-color: #fff; /* White border on focus */
+            outline: none;
+            box-shadow: none;
+            background-color: rgba(255, 255, 255, 0.1); /* Slightly more opaque on focus */
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.5); /* Semi-transparent placeholder */
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, #667eea, #764ba2); /* Gradient button */
+            border: none;
+            width: 100%;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Button shadow */
+            font-size: 16px;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(to right, #5a69d4, #653f91); /* Slightly darker gradient on hover */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* More prominent shadow on hover */
+        }
+
+        .error-message {
+            color: #ffcccc; /* Lighter red error message */
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 mx-auto">
+                <div class="login-container">
+                    <h2 class="login-title">Login</h2>
+                    <form id="login-form" action="/login" method="POST">
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Login</button>
+                        <div id="error-message" class="error-message">
+                            {% if error_message %}  {{ error_message }}
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+
+</html>

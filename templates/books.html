@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Books</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            background-color: #fff;
+        }
+
+        /* Header Styling */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            /* Keeps space between elements */
+            border-bottom: 3px solid black;
+            padding-bottom: 10px;
+        }
+
+        .header-right {
+            /* New class for right-aligned elements */
+            display: flex;
+            align-items: center;
+            margin-right: 2%;
+            /* Add some margin to the right */
+        }
+
+        .header-right>* {
+            /* Style direct children of header-right */
+            margin-left: 10px;
+            /* Space between dropdown and submit button */
+        }
+
+
+        /* Dropdown Button */
+        .dropbtn {
+            background-color: #fff;
+            /* White background */
+            color: #343a40;
+            /* Dark text color */
+            padding: 10px 20px;
+            font-size: 16px;
+            border: 1px solid #ced4da;
+            /* Light gray border */
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            /* Smooth transitions */
+            display: flex;
+            /* Use flexbox for alignment */
+            align-items: center;
+            /* Vertically align icon and text */
+            margin-right: 10%;
+        }
+
+        .dropbtn i {
+            margin-left: 8px;
+            /* Space between text and icon */
+        }
+
+        .dropbtn:hover {
+            background-color: #f8f9fa;
+            /* Slightly darker background on hover */
+            border-color: #adb5bd;
+            /* Slightly darker border on hover */
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        /* Dropdown Content */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width: 120px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            z-index: 1;
+            border: 1px solid #ced4da;
+        }
+
+        .dropdown-content a {
+            color: black;
+            padding: 10px;
+            text-decoration: none;
+            display: block;
+            cursor: pointer;
+            padding: 12px 20px;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #ddd;
+            background-color: #f0f0f0;
+        }
+
+        /* Show dropdown when clicked */
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        /* Book List */
+        .book-list {
+            margin-top: 20px;
+        }
+
+        .book {
+            padding: 10px;
+            font-size: 18px;
+            border-bottom: 1px solid gray;
+            display: none;
+            /* Hidden by default */
+        }
+
+        /* Show only active books */
+        .book.active {
+            display: block;
+        }
+
+
+        /* Sidebar Styling */
+        /* Premium Sidebar Styling */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 20%;
+            height: 100vh;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 4px 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow-y: auto;
+            /* Allows scrolling if content overflows */
+        }
+
+        .sidebar h5 {
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #ffffff;
+            letter-spacing: 1.5px;
+        }
+
+        .author-name {
+            color: #ffffff;
+            font-weight: 500;
+            padding: 10px 15px;
+            border-radius: 6px;
+            transition: all 0.3s ease-in-out;
+            font-size: 16px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            margin-bottom: 8px;
+        }
+
+        .author-name:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+            cursor: pointer;
+        }
+
+        /* Modern Right Content Styling */
+        .content {
+            margin-left: 20%;
+            /* Adjust according to the sidebar width */
+            width: 80%;
+            height: 100vh;
+            /* Full height */
+            overflow-y: auto;
+            /* Makes it scrollable */
+            padding: 30px;
+            background: linear-gradient(135deg, #f1eded 0%, #dfe3ee 100%);
+            border-radius: 10px;
+        }
+
+        /* Updated Book Card Styling */
+        .book-card {
+            background: #ffffff;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.12);
+            transition: transform 0.3s ease-in-out;
+            border-radius: 8px;
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .book-card-img {
+            border-radius: 6px;
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease;
+        }
+
+        .book-card-img:hover {
+            transform: scale(1.05);
+        }
+
+        /* Updated Button Styling */
+        .issue-btn {
+            background-color: #2a5298;
+            color: white;
+            font-weight: bold;
+            border-radius: 25px;
+            padding: 6px 12px;
+            transition: background 0.3s ease;
+            border: none;
+        }
+
+        .issue-btn:hover {
+            background-color: #1e3c72;
+        }
+
+        .issued-btn {
+            background-color: grey !important;
+            cursor: not-allowed;
+            font-weight: bold;
+        }
+
+
+        /* Right Content Styling */
+        .content {
+            background: linear-gradient(135deg, #f1eded 0%, #dfe3ee 100%);
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        /* Book Card Styling */
+        .card {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 4px 4px 15px rgba(0, 0, 0, 0.12);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            padding: 15px;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 6px 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .book-cards {
+            display: inline-grid;
+            grid-template-columns: repeat(3, 2fr);
+            grid-column-gap: 10px;
+            grid-row-gap: 40px;
+            padding-top: 40px;
+            position: relative;
+        }
+
+        .book-card {
+            margin-top: 20px;
+            background-color: #fff;
+            height: 270px;
+            box-shadow: -1px 3px 8px -1px rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            padding: 0 0 20px 20px;
+            color: var(--body-color-light);
+            max-width: 475px;
+        }
+
+        .book-card-img:hover {
+            transform: scale(1.05);
+        }
+
+        .book-card-img {
+            width: 160px;
+            height: 250px;
+            margin-top: -35px;
+            border-radius: 2px;
+            box-shadow: 0px 1px 7px 2px #c7c9d3;
+            border-bottom: 1px solid #dcddde;
+            object-fit: cover;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+
+            &:hover {
+                transform: scale(1.04);
+            }
+        }
+
+        .book-card-img:hover {
+            transform: scale(1.05);
+        }
+
+        .card-content {
+            color: var(--body-color);
+            padding: 25px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .book-name {
+            font-weight: 500;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .book-by {
+            font-size: 13px;
+            color: var(--body-color-light);
+            margin-top: 4px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .book-rate>label {
+            color: #cccccc;
+        }
+
+        .rate {
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .book-rate>input:checked~label,
+        .book-rate:not(:checked)>label:hover,
+        .book-rate:not(:checked)>label:hover~label {
+            color: #ff9700;
+        }
+
+        .book-rate>input:checked+label:hover,
+        .book-rate>input:checked~label:hover,
+        .book-rate>label:hover~input:checked~label,
+        .book-rate>input:checked~label:hover~label {
+            color: #ff9700;
+        }
+
+        .card-vote {
+            color: var(--body-color-light);
+        }
+
+        .card-sum {
+            color: var(--body-color-light);
+            font-size: 13px;
+            line-height: 1.6em;
+            -webkit-line-clamp: 4;
+            margin-top: 15px;
+        }
+
+        .content-wrapper {
+            display: flex;
+            border-bottom: 1px solid #ebedef;
+            position: relative;
+
+            &:before {
+                content: "";
+                position: absolute;
+                background-color: #8f98a9;
+                background-color: #aaaebc;
+                box-shadow: 0 -6px 0 0 #aaaebc, 0 6px 0 0 #aaaebc;
+                width: 4px;
+                height: 4px;
+                border: 0;
+                padding: 0;
+                right: 12px;
+                top: 17px;
+                border-radius: 50%;
+                margin-left: auto;
+            }
+        }
+
+        .likes {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .like-profile {
+            display: flex;
+            align-items: center;
+        }
+
+        .issue-btn {
+            padding: 5px 10px;
+            border: none;
+            background-color: #fff;
+            color: #062074;
+            font-weight: 600;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .issue-btn:hover {
+            background-color: #ffffff;
+            color: #062074;
+            text-decoration: underline;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .issued-btn {
+            background-color: grey !important;
+            cursor: not-allowed;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .search-container {
+            width: 100%;
+            position: relative;
+        }
+
+        .search-container input[type="text"] {
+            width: 100%;
+            padding: 10px 35px 10px 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            font-size: 16px;
+            transition: box-shadow 0.3s ease;
+            border-radius: 35px;
+            height: 3.5rem;
+            /* Rounded corners for the search bar */
+            padding: 10px;
+            /* Add padding to the search bar */
+            border: 1px solid #ced4da;
+            /* Removed background-color */
+        }
+
+        .search-container input[type="text"]:focus {
+            outline: none;
+            box-shadow: 0 3px 7px rgba(0, 0, 0, 0.15);
+            /* Removed background-color on focus */
+        }
+
+        .search-container::before {
+            content: "\f002";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            color: #aaa;
+            font-size: 22px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Left Sidebar (20%) -->
+            <div class="col-md-2 sidebar">
+                <h5>Authors of the Month</h5>
+                <ul class="list-unstyled">
+                    {% for author in authors %}
+                    <li class="author-name">{{ author }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- Right Content Area (80%) -->
+            <div class="col-md-10 content">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="header">
+                        <h2>Articles</h2>
+                        <div class="header-right">
+                            <div class="dropdown">
+                                <button class="dropbtn">Genre <i class="fas fa-chevron-down"></i></button>
+                                <div class="dropdown-content">
+                                    <a href="#" class="genre-option" data-genre="all">All</a>
+                                    {% for genre in genres %}
+                                    <a href="#" class="genre-option" data-genre="{{ genre }}">{{ genre }}</a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <a id="renewalLink" href="{{ url_for('books') }}" class="btn"
+                                style="background-color: #0e0e55; color: #fff;">Membership Renewal</a>
+                            <a id="returnLink" href="{{ url_for('books') }}" class="btn"
+                                style="background-color: #0e0e55; color: #fff;">Return Books</a>
+                            <form id="transactionForm" action="/transactions" method="POST">
+                                <input type="hidden" name="issuedBooks" id="issuedBooksInput">
+                                <button type="submit" class="btn" style="position: relative;">
+                                    <i class="fas fa-book-open"></i>
+                                    <span id="issuedCount" style="position: absolute; top: -5px; right: -5px; background-color: #0e0e55; 
+                                                 color: #fff; padding: 3px 7px; border-radius: 50%; font-size: 10px;  font-weight: 600;
+                                                 display: none;">
+                                        0
+                                    </span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="search-container">
+                    <input class="form-control" type="text" id="searchInput" placeholder="Search by Author or Title">
+                </div>
+                <div class="row">
+
+                    <div class="book-cards">
+                        {% for book in books %}
+                        <div class="book-card" data-genre="{{ book.genre }}">
+                            <div class="content-wrapper">
+                                <img src="{{ book.book_image }}" alt="" class="book-card-img">
+                                <div class="card-content">
+                                    <div class="book-name">📖 {{ book.title }}</div>
+                                    <div class="book-by">✍️ <strong>by {{ book.authors }}</strong></div>
+                                    <div class="rate">
+                                        <fieldset class="rating book-rate">
+                                            {% set rounded_rating = book.average_rating | float | round | int %}
+                                            {% for i in range(1, 6) %}
+                                            {% if i <= rounded_rating %} <label class="full" style="color: #ff9700;">
+                                                ★</label>
+                                                {% else %}
+                                                <label class="full" style="color: #ccc;">★</label>
+                                                {% endif %}
+                                                {% endfor %}
+                                        </fieldset>
+                                        <span class="book-voters card-vote">{{ book.average_rating }} ratings</span>
+                                    </div>
+                                    <div class="book-sum card-sum">
+                                        <strong>-> </strong> ISBN: {{ book.isbn }} <br>
+                                        <strong>-> </strong> Genre: {{ book.genre }} <br>
+                                        <strong>-> </strong> Availability:
+                                        {% if book.num_books_available > 0 %}
+                                        <span
+                                            style="background-color: lightgreen; padding: 2.5px 5px; border-radius: 18px;">Available</span>
+                                        {% else %}
+                                        <span
+                                            style="background-color: lightcoral; padding: 2.5px 5px; border-radius: 18px;">Not
+                                            Available</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="likes">
+                                <div class="like-profile">
+                                    ❤️ <strong>{{ book.likes }} like this</strong>
+                                </div>
+                                {% if book.num_books_available > 0 %}
+                                <button id="issue-btn-{{ book.book_id }}" class="issue-btn"
+                                    onclick="issueBook('{{ book.book_id }}')">
+                                    Issue Book
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<!-- Add this inside the <head> tag -->
+<script>
+    let issuedBooks = [];
+
+    function issueBook(bookId) {
+        const button = document.getElementById(`issue-btn-${bookId}`);
+
+        if (!issuedBooks.some(book => book.bookId === bookId)) {
+            issuedBooks.push({ bookId: bookId });
+
+            button.innerText = "Issued";
+            button.classList.add("issued-btn");
+            button.disabled = true;
+
+            document.getElementById("issuedBooksInput").value = JSON.stringify(issuedBooks);
+            updateIssuedCount();
+        }
+    }
+
+    function updateIssuedCount() {
+        let countElement = document.getElementById("issuedCount");
+        countElement.innerText = issuedBooks.length;
+        countElement.style.display = issuedBooks.length > 0 ? "inline-block" : "none";
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // 1. Genre Filtering (Corrected)
+        document.querySelectorAll('.genre-option').forEach(option => {
+            option.addEventListener('click', function (event) {
+                event.preventDefault();
+                const selectedGenre = this.getAttribute('data-genre');
+
+                document.querySelectorAll('.book-card').forEach(card => {
+                    const cardGenre = card.getAttribute('data-genre');
+                    card.style.display = selectedGenre === "all" || cardGenre === selectedGenre ? 'block' : 'none';
+                });
+            });
+        });
+
+        // 2. Search Functionality (Corrected and Improved)
+        const searchInput = document.getElementById('searchInput');
+        const bookCards = document.querySelectorAll('.book-card');
+
+        searchInput.addEventListener('input', function () {
+            const searchTerm = this.value.toLowerCase();
+
+            bookCards.forEach(card => {
+                const title = card.querySelector('.book-name').textContent.toLowerCase(); // Get title from inside the card
+                const author = card.querySelector('.book-by strong').textContent.toLowerCase();//Get author from inside the card
+
+                if (title.includes(searchTerm) || author.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+
+        // 3. Prevent Form Submission (Corrected)
+        document.getElementById("transactionForm").addEventListener("submit", function (event) {
+            if (!userId) {
+                    event.preventDefault();
+                    alert("You must be logged in to issue books.");
+                } else if (issuedBooks.length === 0) {
+                    event.preventDefault();
+                    alert("No books issued!");
+                }
+        });
+
+        const pathParts = window.location.pathname.split('/'); // Split the path by '/'
+        const userId = pathParts[2]; // The user ID should be the 3rd part (index 2)
+        const renewalLink = document.getElementById('renewalLink');
+        const returnLink = document.getElementById('returnLink');
+
+        if (!userId) {
+            const issueButtons = document.querySelectorAll('.issue-btn');
+            issueButtons.forEach(button => {
+                button.style.display = 'none';
+            });
+            renewalLink.style.display = 'none'; 
+            returnLink.style.display = 'none';
+        }
+
+    });
+</script>
+
+
+</html>

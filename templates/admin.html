@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Librarian Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --light-color: #f4f4f4;
+            --text-color: #333;
+            --box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Softer, more pronounced shadow */
+            --border-radius: 12px; /* Slightly more rounded corners */
+            --transition-duration: 0.3s; /* Consistent transition duration */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: var(--light-color);
+            color: var(--text-color);
+            overflow-x: hidden; /* Prevent horizontal scrollbar */
+        }
+
+        .sidebar {
+            width: 280px;
+            background: var(--secondary-color);
+            color: white;
+            padding: 20px;
+            position: fixed;
+            height: 100%;
+            transition: all var(--transition-duration) ease;
+            box-shadow: 3px 0 8px rgba(0, 0, 0, 0.1); /* Sidebar shadow */
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px; /* Slightly larger title */
+            font-weight: 700; /* Bolder title */
+            color: var(--primary-color); /* Title color */
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar ul li {
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all var(--transition-duration);
+            display: flex;
+            align-items: center;
+            border-radius: var(--border-radius);
+            margin-bottom: 10px; /* Spacing between list items */
+        }
+
+        .sidebar ul li i {
+            margin-right: 15px;
+            width: 20px;
+            text-align: center;
+            color: #ddd; /* Slightly lighter icon color */
+        }
+
+        .sidebar ul li:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .sidebar ul li a {
+            text-decoration: none;
+            color: white;
+            display: block;
+            font-weight: 500;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 30px;
+            transition: all var(--transition-duration) ease;
+        }
+
+        header {
+            background: white;
+            color: var(--text-color);
+            padding: 25px;
+            font-size: 32px; /* Larger header title */
+            font-weight: 700; /* Bolder header title */
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 20px;
+            display: flex; /* Use flexbox for alignment */
+            align-items: center; /* Vertically center content */
+        }
+
+        header i {
+            margin-right: 15px;
+            color: var(--primary-color);
+        }
+
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Adjust minmax */
+            gap: 25px; /* Increased gap */
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            text-align: center;
+            transition: transform var(--transition-duration);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card:hover {
+            transform: translateY(-5px); /* Move up slightly on hover */
+        }
+
+        .card i {
+            font-size: 50px; /* Larger icons */
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .card span {
+            font-size: 28px; /* Larger count */
+            font-weight: 600;
+            margin-top: 10px;
+            color: var(--text-color);
+        }
+
+        .card p { /* Added paragraph styling */
+            font-size: 16px;
+            color: #777;
+            margin-top: 5px;
+        }
+
+        .book-list {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+        }
+
+        .book-list h2 {
+            padding: 20px;
+            font-size: 24px;
+            font-weight: 600;
+            background: #f0f0f0;
+            color: var(--text-color);
+            border-bottom: 1px solid #ddd; /* Added a separator line */
+        }
+
+        .book-list table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed; /* For equal column widths */
+        }
+
+        .book-list th,
+        .book-list td {
+            padding: 18px 15px; /* Increased padding */
+            border: 1px solid #eee;
+            text-align: left;
+            overflow: hidden; /* Hide overflowing text */
+            text-overflow: ellipsis; /* Add ellipsis (...) for overflow */
+            white-space: nowrap; /* Prevent text from wrapping */
+        }
+
+        .book-list th {
+            background: var(--primary-color);
+            color: white;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .book-list tbody tr:hover {
+            background: #f8f8f8;
+        }
+
+        /* Responsive adjustments (Example) */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 250px;
+            }
+
+            .main-content {
+                margin-left: 250px;
+                padding: 20px;
+            }
+
+            .cards {
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 20px;
+            }
+
+            .book-list th,
+            .book-list td {
+                padding: 15px 12px; /* Slightly reduced padding on smaller screens */
+                font-size: 14px; /* Slightly smaller font size */
+
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <h2>Library Admin</h2>
+        <ul>
+            <li><i class="fas fa-tachometer-alt"></i><a href="#">Dashboard</a></li>
+            <li><i class="fas fa-book"></i><a href="#">Books</a></li>
+            <li><i class="fas fa-users"></i><a href="#">Members</a></li>
+            <li><i class="fas fa-sign-out-alt"></i><a href="#" onclick="logout()">Logout</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <header>
+            <i class="fas fa-chart-line"></i> Dashboard
+        </header>
+
+        <section class="cards">
+            <div class="card"><i class="fas fa-book"></i><span>1500</span>
+                <p>Total Books</p>
+            </div>
+            <div class="card"><i class="fas fa-users"></i><span>300</span>
+                <p>Members</p>
+            </div>
+            <div class="card"><i class="fas fa-book-reader"></i><span>120</span>
+                <p>Borrowed Books</p>
+            </div>
+            <div class="card"><i class="fas fa-exclamation-circle"></i><span>10</span>
+                <p>Overdue Books</p>
+            </div>
+        </section>
+
+        <section class="book-list">
+            <h2>Recent Books</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Genre</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>The Great Gatsby</td>
+                        <td>F. Scott Fitzgerald</td>
+                        <td>Fiction</td>
+                        <td>Available</td>
+                    </tr>
+                    <tr>
+                        <td>1984</td>
+                        <td>George Orwell</td>
+                        <td>Dystopian</td>
+                        <td>Borrowed</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </div>
+</body>
+
+<script>
+    function logout() {
+        // Open the logout URL in a new tab
+        const logoutTab = window.open('/admin/login', '_blank');
+
+        // Close the current tab (optional, but might be desired)
+        window.close();
+
+        // Optionally, you can close the newly opened tab after a short delay
+        // if you don't want the user to see it briefly.
+        // However, this might be blocked by the browser's popup blocker
+        // unless the user interacts with the new tab.  Generally, it's 
+        // better to let the user close the tab themselves.
+
+        // setTimeout(() => {
+        //     if (logoutTab) {
+        //         logoutTab.close();
+        //     }
+        // }, 500); // Adjust delay as needed
+    }
+</script>
+
+</html>
