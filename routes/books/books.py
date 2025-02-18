@@ -22,29 +22,26 @@ def handle_book_form(book, template_name, redirect_url):
 
             book.title = request.form['title']
             book.authors = request.form['authors']
-            book.average_rating = float(request.form.get('average_rating') or 0.0)
+            book.average_rating = request.form['average_rating']
             book.isbn = request.form['isbn']
             book.isbn13 = request.form['isbn13']
             book.language_code = request.form['language_code']
-            book.num_pages = int(request.form.get('num_pages') or 0)
-            book.ratings_count = int(request.form.get('ratings_count') or 0)
-            book.text_reviews_count = int(request.form.get('text_reviews_count') or 0)
-
-            publication_date_str = request.form['publication_date']
-            try:
-                book.publication_date = datetime.strptime(publication_date_str, '%Y-%m-%d').date()
+            book.num_pages = request.form['num_pages']
+            book.ratings_count = request.form['ratings_count']
+            book.text_reviews_count = request.form['text_reviews_count']
+            try:  # Handle potential date parsing errors
+                book.publication_date = datetime.strptime(request.form['publication_date'], '%Y-%m-%d').date()
             except ValueError:
                 flash("Invalid publication date format!", "danger")
-                return render_template(template_name, book=book)
+                return render_template('edit-book.html', book=book) #re-render the form with error
 
             book.publisher = request.form['publisher']
             book.genre = request.form['genre']
-            book.likes = int(request.form.get('likes') or 0)
+            book.likes = request.form['likes']
             book.book_image = request.form['book_image']
-            book.num_books_available = int(request.form['num_books_available'])
 
             book.save()
-            flash("Book operation successful!", "success")
+            flash("Book updated successfully!", "success")
             return redirect(url_for(redirect_url))
 
         except Exception as e:
@@ -71,7 +68,7 @@ def bookslist(membership_id):
 @bp.route('/add-book', methods=['GET', 'POST'])
 def add_book():
     book = Book()
-    return handle_book_form(book, 'add-book.html', 'books')
+    return handle_book_form(book, 'add-book.html', 'books.librarian_books')
 
 @bp.route('/edit-book/<int:book_id>', methods=['GET', 'POST'])
 def edit_book(book_id):
@@ -80,7 +77,7 @@ def edit_book(book_id):
     except Book.DoesNotExist:
         flash("Book not found!", "danger")
         return redirect(url_for('books'))
-    return handle_book_form(book, 'edit-book.html', 'librarian_books')
+    return handle_book_form(book, 'edit-book.html', 'books.librarian_books')
 
 @bp.route('/librarian_books')
 def librarian_books():
@@ -92,7 +89,7 @@ def delete_book(book_id):
     book = Book.get_or_none(Book.book_id == book_id)
     if book:
         book.delete_instance()
-    return redirect(url_for('librarian_books'))
+    return redirect(url_for('books.librarian_books'))
 
 @bp.route('/transactions', methods=['POST'])
 def transactions():

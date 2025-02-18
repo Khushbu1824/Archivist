@@ -105,14 +105,14 @@
                 <h2 class="card-title mb-0">Edit Book Details</h2>
             </div>
             <div class="card-body">
-                <form id="edit-book-form" method="POST">  <div class="form-group">
+                <form id="edit-book-form" action="/books/edit-book/{{ book.book_id }}" method="POST">  <div class="form-group">
                         <label for="book_id">Book ID</label>
                         <input type="text" class="form-control" id="book_id" name="book_id" value="{{ book.book_id }}" readonly>
                     </div>
 
                     <div class="form-group">
                         <label for="title" class="required">Title</label>
-                        <input type="text" class="form-control" id="title" name="title" value="{{ book.title }}" autocomplete="off" required>
+                        <input type="text" class="form-control" id="title" name="title" value="{{ book.title }}" required>
                     </div>
 
                     <div class="form-row">

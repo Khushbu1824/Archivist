@@ -3,4 +3,5 @@ bcrypt
 weasyprint
 psycopg2
 peewee
+requests
 gunicorn
