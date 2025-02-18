@@ -1,7 +1,8 @@
 Flask
+python-dotenv
+gunicorn
+peewee
 bcrypt
 weasyprint
-psycopg2
-peewee
 requests
-gunicorn
+psycopg2
