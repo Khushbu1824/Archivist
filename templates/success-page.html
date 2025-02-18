@@ -27,9 +27,14 @@
                 <a class="btn btn-primary btn-sm" href="/books" role="button">Back to Books List</a>
                 <a class="btn btn-success btn-sm" href="/download" download>Download Issued Books List</a>
             </p>
+            <!-- Form to send issued books data to download -->
+            <form action="/download/{{ membership_id }}" method="POST">
+                <input type="hidden" name="issued_books" id="issuedBooksInput" value='{{ issued_books | tojson | safe }}'>
+                <button type="submit" class="btn btn-success btn-sm">Download Issued Books List</button>
+            </form>
         </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </body>

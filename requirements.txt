@@ -1,0 +1,6 @@
+Flask
+bcrypt
+weasyprint
+psycopg2
+peewee
+gunicorn
