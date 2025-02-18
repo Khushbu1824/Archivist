@@ -195,6 +195,57 @@
             background: #f8f8f8;
         }
 
+        .overdue-table {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            margin-top: 20px; /* Space between tables */
+        }
+
+        .overdue-table h2 {
+            padding: 20px;
+            font-size: 24px;
+            font-weight: 600;
+            background: #f0f0f0;
+            color: var(--text-color);
+            border-bottom: 1px solid #ddd;
+        }
+
+        .overdue-table table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        .overdue-table th,
+        .overdue-table td {
+            padding: 18px 15px;
+            border: 1px solid #eee;
+            text-align: left;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .overdue-table th {
+            background: var(--primary-color);
+            color: white;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .overdue-table tbody tr:hover {
+            background: #f8f8f8;
+        }
+
+        .no-overdue {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #777;
+        }
+
         /* Responsive adjustments (Example) */
         @media (max-width: 768px) {
             .sidebar {
@@ -225,9 +276,9 @@
     <div class="sidebar">
         <h2>Library Admin</h2>
         <ul>
-            <li><i class="fas fa-tachometer-alt"></i><a href="#">Dashboard</a></li>
-            <li><i class="fas fa-book"></i><a href="#">Books</a></li>
-            <li><i class="fas fa-users"></i><a href="#">Members</a></li>
+            <li><i class="fas fa-tachometer-alt"></i><a href="">Dashboard</a></li>
+            <li><i class="fas fa-book"></i><a href="/librarian_books">Books</a></li>
+            <li><i class="fas fa-users"></i><a href="/members">Members</a></li>
             <li><i class="fas fa-sign-out-alt"></i><a href="#" onclick="logout()">Logout</a></li>
         </ul>
     </div>
@@ -247,38 +298,37 @@
             <div class="card"><i class="fas fa-book-reader"></i><span>{{ borrowed_books }}</span>
                 <p>Issued Books</p>
             </div>
-            <div class="card"><i class="fas fa-exclamation-circle"></i><span>10</span>
-                <p>Overdue Books</p>
+            <div class="card"><i class="fas fa-exclamation-circle"></i><span>{{ overdue_books }}</span>
+                <p>Pending Returns</p>
             </div>
         </section>
 
-        <section class="book-list">
-            <h2>Recent Books</h2>
+        <section class="overdue-table">
+            <h2>Overdue Books</h2>
+            {% if overdue_transactions %}
             <table>
                 <thead>
                     <tr>
                         <th>Title</th>
-                        <th>Author</th>
-                        <th>Genre</th>
-                        <th>Status</th>
+                        <th>ISBN</th>
+                        <th>Issue Date</th>
+                        <th>Return Date</th>
                     </tr>
                 </thead>
                 <tbody>
+                    {% for transaction in overdue_transactions %}
                     <tr>
-                        <td>The Great Gatsby</td>
-                        <td>F. Scott Fitzgerald</td>
-                        <td>Fiction</td>
-                        <td>Available</td>
+                        <td>{{ transaction.title }}</td>  <td>{{ transaction.isbn }}</td>   <td>{{ transaction.issue_date }}</td>
+                        <td>{{ transaction.return_date }}</td>
                     </tr>
-                    <tr>
-                        <td>1984</td>
-                        <td>George Orwell</td>
-                        <td>Dystopian</td>
-                        <td>Borrowed</td>
-                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
+            {% else %}
+            <p class="no-overdue">No overdue books found.</p>
+            {% endif %}
         </section>
+    
     </div>
 </body>
 
