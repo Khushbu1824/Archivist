@@ -487,11 +487,11 @@
                                 </div>
                             </div>
 
-                            <a id="renewalLink" href="/membership-renewal/{{ membership_id }}" class="btn"
+                            <a id="renewalLink" href="/books/membership-renewal/{{ membership_id }}" class="btn"
                                 style="background-color: #0e0e55; color: #fff;">Membership Renewal</a>
-                            <a id="returnLink" href="/return-books/{{ membership_id }}" class="btn"
+                            <a id="returnLink" href="/books/return-books/{{ membership_id }}" class="btn"
                                 style="background-color: #0e0e55; color: #fff;">Return Books</a>
-                            <form id="transactionForm" action="/issue-book/{{ membership_id }}" method="POST">
+                            <form id="transactionForm" action="/books/issue-book/{{ membership_id }}" method="POST">
                                 <input type="hidden" name="issuedBooks" id="issuedBooksInput">
                                 <button type="submit" class="btn" style="position: relative;">
                                     <i class="fas fa-book-open"></i>

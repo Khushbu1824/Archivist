@@ -24,14 +24,14 @@
                 Having trouble? <a href="mailto:librarian@gmail.com" style="color: blue;">Contact us</a>
             </p>
             <p class="lead">
-                <a class="btn btn-primary btn-sm" href="/books" role="button">Back to Books List</a>
-                <a class="btn btn-success btn-sm" href="/download" download>Download Issued Books List</a>
+                <a class="btn btn-primary btn-sm" href="/books/{{ membership_id }}" role="button">Back to Books List</a>
+                <form action="/books/download/{{ membership_id }}" method="POST">
+                    <input type="hidden" name="issued_books" id="issuedBooksInput" value='{{ issued_books | tojson | safe }}'>
+                    <button type="submit" class="btn btn-success btn-sm">Download Issued Books List</button>
+                </form>
             </p>
             <!-- Form to send issued books data to download -->
-            <form action="/download/{{ membership_id }}" method="POST">
-                <input type="hidden" name="issued_books" id="issuedBooksInput" value='{{ issued_books | tojson | safe }}'>
-                <button type="submit" class="btn btn-success btn-sm">Download Issued Books List</button>
-            </form>
+            
         </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
