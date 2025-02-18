@@ -228,6 +228,7 @@ def delete_book(book_id):
 @app.route('/transactions', methods=['POST'])
 def transactions():
     issued_books_json = request.form.get("issuedBooks")
+    membership_id = Membership.membership_id
 
     if issued_books_json:
         try:
@@ -238,13 +239,11 @@ def transactions():
 
             book_list = [{"title": book.title, "isbn": book.isbn} for book in books_data] #Create list of book details
             
-            return render_template("transactions.html", issued_books=book_list)  # Pass data to template
+            return render_template("transactions.html", issued_books=book_list, membership_id = membership_id)  # Pass data to template
         except json.JSONDecodeError:
             return "Invalid JSON data", 400  # Handle JSON parsing errors
     else:
         return "No books issued", 400 #Handle no books issued error
-
-    return jsonify({"success": False, "message": "No books issued!"})
 
 @app.route("/new-membership")
 def create_membership_form():
@@ -271,7 +270,7 @@ def register():
         print(f"Attempting to insert: {name}, {email}, {contact_no}")
         # Insert into database
         with db.atomic():  # Ensures transaction safety
-            Membership.create(
+            new_member = Membership.create(
                 name=name,
                 dob=dob,
                 email=email,
@@ -285,7 +284,7 @@ def register():
             )
         print("Data Inserted Successfully!")  # Debugging
 
-        return redirect("/new-membership")
+        return redirect(f"/books/{new_member.membership_id}")
 
     except Exception as e:
         print(f"Database Error: {e}")  # Debugging
@@ -497,7 +496,7 @@ def return_books(membership_id):
 
     db.close()
 
-    return render_template("return-books.html", books=books)
+    return render_template("return-books.html", books=books, membership_id=membership_id)
 
 
 

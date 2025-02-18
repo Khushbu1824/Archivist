@@ -76,7 +76,7 @@
 <body>
     <div class="container mt-5">
         <div class="card shadow p-4">
-            <h2 class="text-center mb-4">Library Transaction Form</h2>
+            <h2 class="text-center mb-4">Issue Book Form</h2>
             <form action="/process-transaction" method="POST" id="transaction-form">
                 <!-- Membership ID -->
                 <input type="hidden" name="membership_id" value="{{ membership_id }}">
@@ -144,6 +144,11 @@
                     <button type="submit" class="btn btn-success">Submit Transaction</button>
                 </div>
             </form>
+            <div class="text-center mt-4">
+                <a href="/books/{{ membership_id }}" class="btn btn-primary">
+                    <i class="bi bi-arrow-left"></i> Back to Books List
+                </a>
+            </div>
         </div>
     </div>
 
