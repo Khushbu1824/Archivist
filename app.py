@@ -6,7 +6,6 @@ import json
 import requests
 from peewee import fn
 
-
 def create_app():
 
     app = Flask(__name__)
@@ -32,6 +31,9 @@ def create_app():
         return render_template("success-page.html", membership_id=membership_id)
 
     return app
+
+# This line is crucial for Gunicorn to find your app
+app = create_app()
+
 if __name__ == '__main__':
-    app = create_app()
-    app.run(debug=True)
+    app.run(debug=True)  # Only for local development
