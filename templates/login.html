@@ -56,7 +56,7 @@
             border-bottom-color: #fff; /* White border on focus */
             outline: none;
             box-shadow: none;
-            background-color: rgba(255, 255, 255, 0.1); /* Slightly more opaque on focus */
+            background-color: rgba(255, 255, 0.1); /* Slightly more opaque on focus */
         }
 
         .form-control::placeholder {
@@ -85,6 +85,21 @@
             margin-top: 20px;
             text-align: center;
         }
+
+        .admin-login {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .admin-login a {
+            color: #fff;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .admin-login a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 
@@ -109,6 +124,11 @@
                             {% endif %}
                         </div>
                     </form>
+
+                    <!-- Admin login link -->
+                    <div class="admin-login">
+                        <p>If you're an admin, <br> <a href="/admin/login/2703">click here</a> to login to the admin panel.</p>
+                    </div>
                 </div>
             </div>
         </div>

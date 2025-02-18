@@ -4,6 +4,7 @@ from models import initialize_db, Book, Membership, Admin, Transaction, db
 from datetime import datetime
 from weasyprint import HTML
 import json 
+import requests
 
 app = Flask(__name__)
 app.secret_key = "12345"
@@ -16,26 +17,42 @@ def home():
 
 from peewee import fn
 
+from flask import render_template
+from peewee import fn
+from models import db, Book, Membership, Transaction  # Assuming models are defined in a separate file
+
 @app.route('/admin/2703')
 def admin():
+    
     try:
-        # Ensure database connection is open
         if db.is_closed():
             db.connect()
-
-        # Calculate the total number of books by summing up the number of available books from the Book table
-        total_books = Book.select(fn.SUM(Book.num_books_available)).scalar()
-
-        # Calculate the total number of members by counting the rows in the Membership table
+        print("Database connected:", not db.is_closed(), flush=True)
+        
+        # Fetch total books
+        total_books = Book.select(fn.SUM(Book.num_books_available)).scalar() or 0
+        
         total_members = Membership.select().count()
 
-        # Calculate the total number of borrowed books by counting the transactions in the Transaction table
-        borrowed_books = Transaction.select().where(Transaction.status == 'borrowed').count()
+        borrowed_books = Transaction.select().count()
 
-        # Return the data to the template
-        return render_template('admin.html', total_books=total_books, total_members=total_members, borrowed_books=borrowed_books)
+        current_date = datetime.today().date()  # Correct way to get today's date
+
+        # Count transactions where return_date has passed
+        overdue_books = Transaction.select().where(Transaction.return_date < current_date).count()
+        overdue_transactions = (
+            Transaction.select()  # Select directly from Transaction
+            .where(Transaction.return_date < current_date)
+            .order_by(Transaction.return_date)
+        )
+
+        return render_template('admin.html', total_books=total_books, total_members=total_members,
+                               borrowed_books=borrowed_books, overdue_books=overdue_books, overdue_transactions=overdue_transactions)
+
     except Exception as e:
+        print("Error:", str(e), flush=True)
         return render_template('admin.html', error=str(e))
+
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -87,13 +104,13 @@ def admin_login():
             if checkpw(entered_password_encoded, stored_hash):
                 session['admin_logged_in'] = True  # Set session variable
                 session['user_type'] = 'admin' #Set user type to admin in session
-                return redirect(url_for('librarian_books'))  # Redirect to admin dashboard
+                return redirect(url_for('admin'))  # Redirect to admin dashboard
             else:
                 flash("Invalid username or password")
-                return render_template('admin_login.html')  # Re-render login form
+                return render_template('admin-login.html')  # Re-render login form
         else:
             flash("Invalid username or password")
-            return render_template('admin_login.html')
+            return render_template('admin-login.html')
 
     return render_template('admin-login.html')
 
@@ -141,6 +158,7 @@ def add_book():
             genre = request.form['genre']
             book_image = request.form['book_image']
             likes = request.form.get('likes')
+            num_books_available = request.form['num_books_available']
 
             with db.atomic():
                 Book.create(
@@ -157,7 +175,8 @@ def add_book():
                     publisher=publisher,
                     genre=genre,
                     likes=int(likes) if likes else 0,
-                    book_image=book_image
+                    book_image=book_image,
+                    num_books_available=int(num_books_available)  # Add num_books_available field
                 )
 
             flash("Book added successfully!", "success")
@@ -173,6 +192,7 @@ def add_book():
                 db.close()
 
     return render_template('add-book.html')
+
 
 @app.route('/edit-book/<int:book_id>', methods=['GET', 'POST'])
 def edit_book(book_id):
@@ -205,7 +225,7 @@ def edit_book(book_id):
 
         book.save()
         flash("Book updated successfully!", "success")
-        return redirect(url_for('books'))  # Redirect back to the book list
+        return redirect(url_for('librarian_books'))  # Redirect back to the book list
 
     return render_template('edit-book.html', book=book)
 
@@ -322,7 +342,7 @@ def edit_member(member_id):
             member.dob = datetime.strptime(request.form['dob'], '%Y-%m-%d').date()
         except ValueError:
             flash("Invalid date of birth format!", "danger")
-            return render_template('edit-member.html', member=member)  # Pass the member object
+            return render_template('edit-m3ember.html', member=member)  # Pass the member object
 
         member.email = request.form['email']
         member.contact_no = request.form['contact_no']
@@ -579,6 +599,94 @@ def return_book():
         db.close()
         return jsonify({"success": False, "message": str(e)})
 
+@app.route('/import-books', methods=['GET', 'POST'])
+def import_books():
+    if request.method == 'POST':
+        try:
+            if db.is_closed():
+                db.connect()
+
+            num_books = int(request.form.get('num_books', 20))  # Default to 20 if not specified
+            title = request.form.get('title')
+            authors = request.form.get('authors')
+            isbn = request.form.get('isbn')
+            publisher = request.form.get('publisher')
+            page = request.form.get('page')  # Add 'page' parameter
+
+            imported_count = 0
+            current_page = 1
+
+            while imported_count < num_books:
+                api_url = "https://frappe.io/api/method/frappe-library"
+                params = {'page': current_page}
+                if title:
+                    params['title'] = title
+                if authors:
+                    params['authors'] = authors
+                if isbn:
+                    params['isbn'] = isbn
+                if publisher:
+                    params['publisher'] = publisher
+                if page:
+                    params['page'] = page #Add page parameter
+
+                response = requests.get(api_url, params=params)
+
+                if response.status_code == 200:
+                    data = response.json()
+                    books = data.get('message', [])
+
+                    if not books: #If no books are returned, break the loop
+                        break
+
+                    for book_data in books:
+                        if imported_count >= num_books: #Check if the required number of books has been imported
+                            break
+                        try:
+                            publication_date_str = book_data.get('publication_date')
+                            publication_date = datetime.strptime(publication_date_str, '%m/%d/%Y').date() if publication_date_str else None
+
+                            with db.atomic():
+                                Book.create(
+                                    title=book_data.get('title'),
+                                    authors=book_data.get('authors'),
+                                    average_rating=float(book_data.get('average_rating', 0)),
+                                    isbn=book_data.get('isbn'),
+                                    isbn13=book_data.get('isbn13'),
+                                    language_code=book_data.get('language_code'),
+                                    num_pages=int(book_data.get('num_pages', 0)),
+                                    ratings_count=int(book_data.get('ratings_count', 0)),
+                                    text_reviews_count=int(book_data.get('text_reviews_count', 0)),
+                                    publication_date=publication_date,
+                                    publisher=book_data.get('publisher'),
+                                    genre=book_data.get('genre'), #Add genre if API provides it
+                                    book_image = book_data.get('book_image'), #Add book_image if API provides it
+                                    likes=int(book_data.get('likes', 0)),
+                                    num_books_available=int(book_data.get('num_books_available', 1))
+                                )
+                            imported_count += 1
+                        except ValueError as ve:
+                            print(f"Error converting data for book: {book_data.get('title')}. Error: {ve}")
+                        except Exception as e:
+                            print(f"Error importing book: {book_data.get('title')}. Error: {e}")
+
+                    current_page += 1  # Increment page for next API call
+                else:
+                    flash(f"Error fetching data from API: {response.status_code}")
+                    break  # Exit loop if API request fails
+
+            flash(f"{imported_count} books imported successfully!")
+            return redirect(url_for('librarian_books'))
+
+        except Exception as e:
+            flash(f"An error occurred during import: {e}")
+            return render_template('import_books.html')
+
+        finally:
+            if not db.is_closed():
+                db.close()
+
+    return render_template('import_books.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
