@@ -142,7 +142,7 @@
 <body>
     <div class="container">
         <h1>Book List</h1>
-        <a href="/add-book" class="btn btn-primary add-book-button"><i class="fas fa-plus mr-2"></i>Add Book</a>
+        <a href="/books/add-book" class="btn btn-primary add-book-button"><i class="fas fa-plus mr-2"></i>Add Book</a>
 
         <div class="search-container">
             <input class="form-control" type="text" id="searchInput" placeholder="Search by Author or Title">
@@ -177,6 +177,11 @@
             {% if not books %}
             <p class="text-center">No books found.</p>
             {% endif %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="/admin/2703" class="btn btn-primary">
+                <i class="bi bi-arrow-left"></i> Back to Panel
+            </a>
         </div>
     </div>
 </body>
