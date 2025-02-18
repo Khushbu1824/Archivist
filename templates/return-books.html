@@ -179,7 +179,7 @@
                 // Get the selected rating (count how many stars are selected)
                 var rating = $("#rating-" + transactionId).find(".star.selected").length;
 
-                $.post("/return-book", { 
+                $.post("/books/return-book", { 
                     transaction_id: transactionId, 
                     liked: wasLiked, 
                     book_id: bookId,
