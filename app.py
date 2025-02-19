@@ -24,7 +24,12 @@ def create_app():
 
     @app.route('/')
     def home():
-        return render_template("home.html")
+        # Fetch top 3 books with the highest likes
+        top_books = (Book.select()
+                        .order_by(Book.likes.desc())
+                        .limit(3))
+
+        return render_template("home.html", top_books=top_books)
     
     @app.route('/issued_books/<int:membership_id>')
     def issued_books(membership_id):
