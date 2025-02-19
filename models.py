@@ -1,37 +1,25 @@
 import os
 from dotenv import load_dotenv
-from peewee import Model, AutoField, PostgresqlDatabase, CharField, IntegerField, FloatField, DateField, BlobField, ForeignKeyField
+from peewee import (
+    Model, AutoField, PostgresqlDatabase, CharField, IntegerField, 
+    FloatField, DateField, BlobField, ForeignKeyField
+)
 
-# Load environment variables from .env file
+# Load environment variables
 load_dotenv()
 
-# Ensure all required database credentials are loaded
-DATABASE = {
-    'name': os.getenv('DB_NAME'),
-    'user': os.getenv('DB_USER'),
-    'password': os.getenv('DB_PASSWORD'),
-    'host': os.getenv('DB_HOST'),
-    'port': os.getenv('DB_PORT')
-}
+# Use Supabase PostgreSQL connection
+DATABASE_URL = os.getenv("SUPABASE_DB_URL")
 
-# Check if all required environment variables are set
-missing_vars = [key for key, value in DATABASE.items() if value is None]
-if missing_vars:
-    raise ValueError(f"Missing environment variables: {', '.join(missing_vars)}")
+if not DATABASE_URL:
+    raise ValueError("SUPABASE_DB_URL is not set in environment variables!")
 
-# Connect to the PostgreSQL database
-db = PostgresqlDatabase(
-    DATABASE['name'],
-    user=DATABASE['user'],
-    password=DATABASE['password'],
-    host=DATABASE['host'],
-    port=int(DATABASE['port'])
-)
+db = PostgresqlDatabase(DATABASE_URL, autorollback=True)
 
 class BaseModel(Model):
     class Meta:
         database = db
-        
+
 class Admin(BaseModel):
     admin_id = AutoField()
     username = CharField(unique=True)
@@ -65,12 +53,11 @@ class Membership(BaseModel):
     email = CharField(unique=True)
     contact_no = CharField()
     password = BlobField()
-    address = CharField(null=True)  # Optional field
-    membership_type = CharField()  # E.g., Student, Faculty, Guest
+    address = CharField(null=True)
+    membership_type = CharField()
     membership_start_date = DateField()
     membership_expiry_date = DateField()
-    status = CharField(default="Active")  # Active, Inactive, Expired
-
+    status = CharField(default="Active")
 
 class Transaction(BaseModel):
     transaction_id = AutoField()
@@ -79,10 +66,10 @@ class Transaction(BaseModel):
     isbn = CharField()
     title = CharField()
     issue_date = DateField()
-    return_date = DateField(null=True)  # Nullable, as book may not be returned yet
-    status = CharField(default="Issued")  # "Issued" or "Returned"
+    return_date = DateField(null=True)
+    status = CharField(default="Issued")
 
 def initialize_db():
     db.connect()
-    db.create_tables([Book, Membership, Admin, Transaction], safe=True)  # safe=True prevents errors if tables already exist
+    db.create_tables([Book, Membership, Admin, Transaction], safe=True)
     db.close()
