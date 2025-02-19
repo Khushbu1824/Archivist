@@ -6,13 +6,10 @@ from peewee import Model, AutoField, PostgresqlDatabase, CharField, IntegerField
 load_dotenv()
 
 # Ensure all required database credentials are loaded
-# DATABASE = {
-#     'name': os.getenv('DB_NAME'),
-#     'user': os.getenv('DB_USER'),
-#     'password': os.getenv('DB_PASSWORD'),
-#     'host': os.getenv('DB_HOST'),
-#     'port': os.getenv('DB_PORT')
-# }
+DATABASE = {
+    'DB_URI': os.getenv('DB_URI'),
+}
+
 
 # DATABASE_URL = os.getenv("SUPABASE_DB_URL")
 
