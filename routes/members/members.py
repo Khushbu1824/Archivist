@@ -1,9 +1,11 @@
-from flask import Flask, Blueprint, render_template, request, redirect, flash, session, url_for, jsonify
+from flask import Flask, Blueprint, render_template, request, redirect, flash, session, url_for, jsonify, Response
 from bcrypt import hashpw, gensalt, checkpw
 from models import initialize_db, Book, Membership, Admin, Transaction, db
 from datetime import datetime
 import json 
 import requests
+import csv
+import io
 
 bp = Blueprint('members', __name__, url_prefix='/members')
 
@@ -159,3 +161,27 @@ def membership_renewal(id):
         except Exception as e:
             flash(f"An error occurred: {str(e)}")
             return render_template('membership-renewal.html', membership=membership)
+
+@bp.route('/download-csv')
+def download_csv():
+    members_ls = Membership.select()
+
+    # Create a string buffer to hold the CSV data
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    # Write the header
+    writer.writerow(["S No.", "Name", "Membership Start Date", "Membership Expiry Date", "Status"])
+
+    # Write member data
+    for index, member in enumerate(members_ls, start=1):
+        writer.writerow([index, member.name, member.membership_start_date, member.membership_expiry_date, member.status])
+
+    # Get CSV data from buffer
+    output.seek(0)
+
+    # Create a Flask Response with CSV data
+    response = Response(output.getvalue(), content_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=members_list.csv"
+    
+    return response
