@@ -143,36 +143,18 @@
     <div class="container mt-5">
         <h2 class="text-center mb-4">Most Liked Books 📚</h2>
         <div class="row">
-            <div class="col-md-4">
-                <div class="card book-card">
-                    <img src="https://m.media-amazon.com/images/I/81FPzmB5fgL.jpg" alt="The Alchemist">
-                    <div class="book-info">
-                        <h5>The Alchemist</h5>
-                        <p>By Paulo Coelho</p>
-                        <p>❤️ 120 Likes</p>
+            {% for book in top_books %}
+                <div class="col-md-4">
+                    <div class="card book-card">
+                        <img src="{{ book.book_image }}" alt="{{ book.title }}">
+                        <div class="book-info">
+                            <h5>{{ book.title }}</h5>
+                            <p>By {{ book.authors }}</p>
+                            <p>❤️ {{ book.likes }} Likes</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card book-card">
-                    <img src="https://m.media-amazon.com/images/I/81gepf1eMqL.jpg" alt="To Kill a Mockingbird">
-                    <div class="book-info">
-                        <h5>To Kill a Mockingbird</h5>
-                        <p>By Harper Lee</p>
-                        <p>❤️ 150 Likes</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card book-card">
-                    <img src="https://m.media-amazon.com/images/I/81F90H7hnML.jpg" alt="Atomic Habits">
-                    <div class="book-info">
-                        <h5>Atomic Habits</h5>
-                        <p>By James Clear</p>
-                        <p>❤️ 180 Likes</p>
-                    </div>
-                </div>
-            </div>
+            {% endfor %}
         </div>
         <div class="view-books-btn">
             <a href="/books" class="btn" style="background-color: #0e0e55; color: #fff;">View Books</a>
