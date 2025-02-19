@@ -1,10 +1,12 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, make_response
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, make_response, Response
 from datetime import datetime
 from models import Book, Membership, Transaction, db
 from weasyprint import HTML
 import json
 import requests
 import traceback
+import csv
+import io
 
 bp = Blueprint('books', __name__, url_prefix='/books')
 
@@ -342,3 +344,36 @@ def import_books():
                 db.close()
 
     return render_template('import_books.html')
+
+@bp.route('/download-csv')
+def download_books_csv():
+    books_ls = Book.select()
+
+    # Create a string buffer to hold the CSV data
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    # Write the header
+    writer.writerow([
+        "S No.", "Book ID", "Title", "Authors", "Average Rating", "ISBN", "ISBN-13",
+        "Language Code", "Number of Pages", "Ratings Count", "Text Reviews Count",
+        "Publication Date", "Publisher", "Genre", "Likes", "Book Image", "Books Available"
+    ])
+
+    # Write book data
+    for index, book in enumerate(books_ls, start=1):
+        writer.writerow([
+            index, book.book_id, book.title, book.authors, book.average_rating,
+            book.isbn, book.isbn13, book.language_code, book.num_pages,
+            book.ratings_count, book.text_reviews_count, book.publication_date,
+            book.publisher, book.genre, book.likes, book.book_image, book.num_books_available
+        ])
+
+    # Get CSV data from buffer
+    output.seek(0)
+
+    # Create a Flask Response with CSV data
+    response = Response(output.getvalue(), content_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=books_list.csv"
+    
+    return response
